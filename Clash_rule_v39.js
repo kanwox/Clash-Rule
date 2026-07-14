@@ -87,11 +87,11 @@ function main(params) {
         return allProxies.some(p => filterRe.test(p.name) && !excludeRe.test(p.name));
     });
 
-    // 普通订阅按已展开节点动态生成；只有 proxy-providers 且节点尚未展开时，
-    // 预先生成全部地区组，待 Mihomo 载入 provider 后再由 filter 筛选。
-    const activeRegions = allProxies.length > 0
-        ? matchedRegions
-        : (hasProxyProviders ? regions : []);
+    // 普通订阅按已展开节点动态生成；只要存在 proxy-providers（包括与本地节点混用），
+    // 就预先生成全部地区组，待 Mihomo 载入 provider 后再由 filter 筛选。
+    const activeRegions = hasProxyProviders
+        ? regions
+        : matchedRegions;
     const hasActiveRegions = activeRegions.length > 0;
 
     let groups = [];
