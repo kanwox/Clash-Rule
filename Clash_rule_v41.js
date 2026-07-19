@@ -16,7 +16,6 @@ function main(params) {
         }
     };
     Object.assign(params, basicOptions);
-
     params["sniffer"] = {
         "enable": true,
         "sniff": {
@@ -26,7 +25,6 @@ function main(params) {
         },
         "skip-domain": [ "Mijia Cloud", "+.push.apple.com" ]
     };
-
     params["dns"] = {
         "enable": true,
         "listen": "127.0.0.1:1053",
@@ -49,6 +47,14 @@ function main(params) {
             "https://1.1.1.1/dns-query#主代理",
             "https://8.8.8.8/dns-query#主代理"
         ],
+        "fallback": [
+            "https://dns.cloudflare.com/dns-query",
+            "https://dns.google/dns-query"
+        ],
+        "fallback-filter": {
+            "geoip": true,
+            "geoip-code": "CN"
+        },
         "nameserver-policy": {
             "geosite:private": ["system://"],
             "geosite:category-ads-all": ["rcode://name_error"],
@@ -58,9 +64,7 @@ function main(params) {
             ]
         }
     };
-
     const excludeFilter = '(?i)(剩余|官网|套餐|流量|到期|过期|更新|刷新|订阅|群|网址|客服|欢迎|加入|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\\d+(\\.\\d+)?\\s*(GB|TB)|\\d+\\s*Days?|Date)([^A-Za-z0-9]|$))';
-
     const regions = [
         { name: "BD", regex: "(?i)(孟加拉|孟加拉國|达卡|達卡|🇧🇩|(^|[^A-Za-z])BD([^A-Za-z]|$)|(^|[^A-Za-z])BGD([^A-Za-z]|$)|Bangladesh|Dhaka)", icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/bd.svg" },
         { name: "DE", regex: "(?i)(德国|德國|法兰克福|法蘭克福|🇩🇪|(^|[^A-Za-z])DE([^A-Za-z]|$)|(^|[^A-Za-z])DEU([^A-Za-z]|$)|Germany|Frankfurt)", icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/de.svg" },
@@ -104,11 +108,6 @@ function main(params) {
         { name: "US", regex: "(?i)(美国|美國|洛杉矶|洛杉磯|圣何塞|聖何塞|硅谷|矽谷|西雅图|西雅圖|纽约|紐約|🇺🇸|(^|[^A-Za-z])US([^A-Za-z]|$)|(^|[^A-Za-z])USA([^A-Za-z]|$)|United[ -]?States)", icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/us.svg" },
         { name: "VN", regex: "(?i)(越南|河内|河內|胡志明|🇻🇳|(^|[^A-Za-z])VN([^A-Za-z]|$)|(^|[^A-Za-z])VNM([^A-Za-z]|$)|Viet[ -]?Nam|Hanoi|Ho[ -]?Chi[ -]?Minh)", icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/vn.svg" }
     ];
-
-    // 只保留机场实际下发了节点的地区，没有对应节点的地区分组不再生成
-    // 注意：脚本本身运行在 JS 引擎里，(?i) 是 Go 正则语法，JS RegExp 不支持，
-    // 这里做本地匹配时要去掉 (?i) 前缀改用 JS 的 i 标志；需要区分大小写的地区则提供 localRegexes。
-    // filter/exclude-filter 字段本身保持 Go 正则写法不动，那是给 Mihomo 核心用的。
     const toJsRegex = (goStyleRegex) => new RegExp(goStyleRegex.replace(/^\(\?i\)/, ""), "i");
     const getLocalRegexes = (region) => region.localRegexes
         ? region.localRegexes.map(({ source, flags }) => new RegExp(source, flags))
@@ -120,16 +119,11 @@ function main(params) {
         const filterRes = getLocalRegexes(r);
         return allProxies.some(p => filterRes.some(re => re.test(p.name)) && !excludeRe.test(p.name));
     });
-
-    // 普通订阅按已展开节点动态生成；只要存在 proxy-providers（包括与本地节点混用），
-    // 就预先生成全部地区组，待 Mihomo 载入 provider 后再由 filter 筛选。
     const activeRegions = hasProxyProviders
         ? regions
         : matchedRegions;
     const hasActiveRegions = activeRegions.length > 0;
-
     let groups = [];
-
     groups.push({
         name: "主代理",
         type: "select",
@@ -138,7 +132,6 @@ function main(params) {
             ? ["自动", "静态", "DIRECT"]
             : ["静态", "DIRECT"]
     });
-
     if (hasActiveRegions) {
         groups.push({
             name: "自动",
@@ -147,7 +140,6 @@ function main(params) {
             proxies: activeRegions.map(r => `${r.name} 自动`)
         });
     }
-
     groups.push({
         name: "静态",
         type: "select",
@@ -157,13 +149,11 @@ function main(params) {
         "exclude-filter": excludeFilter,
         "empty-fallback": "REJECT"
     });
-
     const appProxiesList = [
         "主代理", "静态", "DIRECT",
         ...activeRegions.map(r => `${r.name} 自动`),
         ...activeRegions.map(r => `${r.name} 静态`)
     ];
-
     const apps = [
         { name: "AI", icon: "openai.png" }, { name: "Apple", icon: "apple.png" },
         { name: "GitHub", icon: "https://i.postimg.cc/vTSTYrLQ/github.png" },
@@ -172,7 +162,6 @@ function main(params) {
         { name: "TikTok", icon: "tiktok.png" }, { name: "Twitch", icon: "twitch.png" },
         { name: "YouTube", icon: "youtube.png" }
     ];
-
     apps.forEach(app => {
         const icon = app.icon.startsWith("http")
             ? app.icon
@@ -184,10 +173,8 @@ function main(params) {
             proxies: appProxiesList
         });
     });
-
     activeRegions.forEach(r => {
         const regionIcon = r.icon;
-
         groups.push({
             name: `${r.name} 自动`,
             type: "url-test",
@@ -206,7 +193,6 @@ function main(params) {
             "max-failed-times": 5,
             "expected-status": 204
         });
-
         groups.push({
             name: `${r.name} 静态`,
             type: "select",
@@ -218,11 +204,8 @@ function main(params) {
             "empty-fallback": "REJECT"
         });
     });
-
     params["proxy-groups"] = groups;
-
-    delete params["rule-providers"]; 
-    
+    delete params["rule-providers"];
     params["rules"] = [
         "GEOSITE,private,DIRECT",
         "GEOIP,private,DIRECT,no-resolve",
@@ -242,6 +225,5 @@ function main(params) {
         "GEOIP,cn,DIRECT,no-resolve",
         "MATCH,主代理"
     ];
-
     return params;
 }
