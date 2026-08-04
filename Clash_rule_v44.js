@@ -52,7 +52,6 @@
             "localhost.ptlogin2.qq.com",
             "+.msftconnecttest.com",
             "+.msftncsi.com",
-            "*stun*",
             "*.ntp.org",
             "+.xboxlive.com",
             "+.playstation.net",
