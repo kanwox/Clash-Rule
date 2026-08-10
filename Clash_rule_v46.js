@@ -7,7 +7,8 @@ function main(params) {
   "unified-delay": true,
   "tcp-concurrent": true,
   "geodata-mode": true,
-  "geo-auto-update": false,
+  "geo-auto-update": true,
+  "geo-update-interval": 720,
   "ipv6": true,
   "find-process-mode": "off",
   "profile": {
@@ -55,7 +56,6 @@ delete params["global-client-fingerprint"];
             "+.ntp.org",
             "+.xboxlive.com",
             "+.playstation.net",
-            "+.xboxlive.com",
 "+.xbox.com",
 "xbox.ipv6.microsoft.com",
             "+.srv.nintendo.net",
@@ -70,8 +70,22 @@ delete params["global-client-fingerprint"];
             "https://doh.pub/dns-query"
         ],
         "nameserver": [
-            "https://1.1.1.1/dns-query#Ö÷´úÀí",
-            "https://8.8.8.8/dns-query#Ö÷´úÀí"
+            "https://1.1.1.1/dns-query#ä¸»ä»£ç†",
+            "https://8.8.8.8/dns-query#ä¸»ä»£ç†"
+        ],
+        /*
+         * å…œåº•ï¼šå›½å†… DoH ç›´è¿ã€‚
+         * å½“ä¸»ä»£ç†è¢«åˆ‡åˆ° DIRECTã€æˆ–ä»£ç†æ•…éšœå¯¼è‡´
+         * nameserver ä¸å¯è¾¾æ—¶ï¼Œç”± fallback æ¥ç®¡è§£æï¼Œ
+         * é¿å… DNS æ•´ä½“ç˜«ç—ªã€‚
+         * æ³¨æ„ï¼šæ­¤å¤„åˆ»æ„ä¸é…ç½® fallback-filterâ€”â€”
+         * nameserver å·²æ˜¯ä»£ç†å†…çš„æ— æ±¡æŸ“ DNSï¼Œ
+         * è‹¥åŠ  geoip è¿‡æ»¤ï¼Œåè€Œä¼šæŠŠå¢ƒå¤–åŸŸåçš„è§£æç»“æœ
+         * æ›¿æ¢æˆ fallback å¯èƒ½å·²è¢«æ±¡æŸ“çš„ç»“æœã€‚
+         */
+        "fallback": [
+            "https://dns.alidns.com/dns-query",
+            "https://doh.pub/dns-query"
         ],
         "nameserver-policy": {
             "geosite:private": [
@@ -88,8 +102,8 @@ delete params["global-client-fingerprint"];
     };
 
     /*
-     * ÄÚÁª½ÚµãÓÅÏÈÊ¹ÓÃ IPv4¡£
-     * Ë«Õ»½ÚµãÓÅÏÈ IPv4£¬Ö»ÓĞ IPv6 µØÖ·Ê±ÈÔ¿ÉÊ¹ÓÃ IPv6¡£
+     * å†…è”èŠ‚ç‚¹ä¼˜å…ˆä½¿ç”¨ IPv4ã€‚
+     * åŒæ ˆèŠ‚ç‚¹ä¼˜å…ˆ IPv4ï¼Œåªæœ‰ IPv6 åœ°å€æ—¶ä»å¯ä½¿ç”¨ IPv6ã€‚
      */
     (params.proxies || []).forEach(proxy => {
         if (proxy && proxy.type !== "direct") {
@@ -98,8 +112,8 @@ delete params["global-client-fingerprint"];
     });
 
     /*
-     * ¶ÔÔ¶³Ì½ÚµãÌá¹©Æ÷ÖĞµÄ½ÚµãÓ¦ÓÃÏàÍ¬ÉèÖÃ¡£
-     * ±£ÁôÌá¹©Æ÷Ô­ÓĞµÄÆäËû¸²¸ÇÉèÖÃ¡£
+     * å¯¹è¿œç¨‹èŠ‚ç‚¹æä¾›å™¨ä¸­çš„èŠ‚ç‚¹åº”ç”¨ç›¸åŒè®¾ç½®ã€‚
+     * ä¿ç•™æä¾›å™¨åŸæœ‰çš„å…¶ä»–è¦†ç›–è®¾ç½®ã€‚
      */
     Object.values(params["proxy-providers"] || {}).forEach(provider => {
         if (provider && typeof provider === "object") {
@@ -114,103 +128,103 @@ delete params["global-client-fingerprint"];
     });
 
     /*
-     * Îª³Ô uTLS Ö¸ÎÆµÄ TLS ½Úµã²¹ client-fingerprint=chrome¡£
-     * Ö»´¦Àí vless/vmess/trojan ÇÒÈ·Êµ×ß TLS µÄ; ÒÑ×Ô´øÖ¸ÎÆ¡¢QUIC Ïµ¡¢ss µÈÒ»ÂÉ²»Åö¡£
+     * ä¸ºåƒ uTLS æŒ‡çº¹çš„ TLS èŠ‚ç‚¹è¡¥ client-fingerprint=chromeã€‚
+     * åªå¤„ç† vless/vmess/trojan ä¸”ç¡®å®èµ° TLS çš„; å·²è‡ªå¸¦æŒ‡çº¹ã€QUIC ç³»ã€ss ç­‰ä¸€å¾‹ä¸ç¢°ã€‚
      */
     const FP_OK = ["vless", "vmess", "trojan"];
     (params.proxies || []).forEach(proxy => {
-        if (!proxy || FP_OK.indexOf(proxy.type) === -1) return;   // Ğ­Òé²»ÔÚ°×Ãûµ¥
-        if (proxy["client-fingerprint"]) return;                  // ÒÑ×Ô´ø
+        if (!proxy || FP_OK.indexOf(proxy.type) === -1) return;   // åè®®ä¸åœ¨ç™½åå•
+        if (proxy["client-fingerprint"]) return;                  // å·²è‡ªå¸¦
         const usesTLS = proxy.type === "trojan" || proxy.tls === true || proxy["reality-opts"];
         if (usesTLS) proxy["client-fingerprint"] = "chrome";
     });
 
-    const excludeFilter = '(?i)(Ê£Óà|¹ÙÍø|Ì×²Í|Á÷Á¿|µ½ÆÚ|¹ıÆÚ|¸üĞÂ|Ë¢ĞÂ|¶©ÔÄ|Èº|ÍøÖ·|¿Í·ş|»¶Ó­|¼ÓÈë|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\\d+(\\.\\d+)?\\s*(GB|TB)|\\d+\\s*Days?|Date)([^A-Za-z0-9]|$))';
+    const excludeFilter = '(?i)(å‰©ä½™|å®˜ç½‘|å¥—é¤|æµé‡|åˆ°æœŸ|è¿‡æœŸ|æ›´æ–°|åˆ·æ–°|è®¢é˜…|ç¾¤|ç½‘å€|å®¢æœ|æ¬¢è¿|åŠ å…¥|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\\d+(\\.\\d+)?\\s*(GB|TB)|\\d+\\s*Days?|Date)([^A-Za-z0-9]|$))';
 
     const regions = [
         {
             name: "BD",
-            regex: "(?i)(ÃÏ¼ÓÀ­|ÃÏ¼ÓÀ­‡ø|´ï¿¨|ß_¿¨|??|(^|[^A-Za-z])BD([^A-Za-z]|$)|(^|[^A-Za-z])BGD([^A-Za-z]|$)|Bangladesh|Dhaka)",
+            regex: "(?i)(å­ŸåŠ æ‹‰|å­ŸåŠ æ‹‰åœ‹|è¾¾å¡|é”å¡|ğŸ‡§ğŸ‡©|(^|[^A-Za-z])BD([^A-Za-z]|$)|(^|[^A-Za-z])BGD([^A-Za-z]|$)|Bangladesh|Dhaka)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/bd.svg"
         },
         {
             name: "DE",
-            regex: "(?i)(µÂ¹ú|µÂ‡ø|·¨À¼¿Ë¸£|·¨Ìm¿Ë¸£|??|(^|[^A-Za-z])DE([^A-Za-z]|$)|(^|[^A-Za-z])DEU([^A-Za-z]|$)|Germany|Frankfurt)",
+            regex: "(?i)(å¾·å›½|å¾·åœ‹|æ³•å…°å…‹ç¦|æ³•è˜­å…‹ç¦|ğŸ‡©ğŸ‡ª|(^|[^A-Za-z])DE([^A-Za-z]|$)|(^|[^A-Za-z])DEU([^A-Za-z]|$)|Germany|Frankfurt)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/de.svg"
         },
         {
             name: "FR",
-            regex: "(?i)(·¨¹ú|·¨‡ø|°ÍÀè|??|(^|[^A-Za-z])FR([^A-Za-z]|$)|(^|[^A-Za-z])FRA([^A-Za-z]|$)|France|Paris)",
+            regex: "(?i)(æ³•å›½|æ³•åœ‹|å·´é»|ğŸ‡«ğŸ‡·|(^|[^A-Za-z])FR([^A-Za-z]|$)|(^|[^A-Za-z])FRA([^A-Za-z]|$)|France|Paris)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/fr.svg"
         },
         {
             name: "GB",
-            regex: "(?i)(Ó¢¹ú|Ó¢‡ø|Â×¶Ø|‚¶Ø|??|(^|[^A-Za-z])UK([^A-Za-z]|$)|(^|[^A-Za-z])GB([^A-Za-z]|$)|(^|[^A-Za-z])GBR([^A-Za-z]|$)|United[ -]?Kingdom|England|London)",
+            regex: "(?i)(è‹±å›½|è‹±åœ‹|ä¼¦æ•¦|å€«æ•¦|ğŸ‡¬ğŸ‡§|(^|[^A-Za-z])UK([^A-Za-z]|$)|(^|[^A-Za-z])GB([^A-Za-z]|$)|(^|[^A-Za-z])GBR([^A-Za-z]|$)|United[ -]?Kingdom|England|London)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/gb.svg"
         },
         {
             name: "HK",
-            regex: "(?i)(Ïã¸Û|??|(^|[^A-Za-z])HK([^A-Za-z]|$)|(^|[^A-Za-z])HKG([^A-Za-z]|$)|Hong[ -]?Kong)",
+            regex: "(?i)(é¦™æ¸¯|ğŸ‡­ğŸ‡°|(^|[^A-Za-z])HK([^A-Za-z]|$)|(^|[^A-Za-z])HKG([^A-Za-z]|$)|Hong[ -]?Kong)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/hk.svg"
         },
         {
             name: "ID",
-            regex: "(?i)(Ó¡¶ÈÄáÎ÷ÑÇ|Ó¡¶ÈÄáÎ÷†|Ó¡Äá|ÑÅ¼Ó´ï|ÑÅ¼Óß_|??|Indonesia|Jakarta|(?:^|[|/¡¤?][ ]*)ID(?:[ ]*(?:[|/_¡¤?-]|[0-9])|$)|(?:^|[^A-Za-z0-9])IDN(?:[^A-Za-z]|$))",
+            regex: "(?i)(å°åº¦å°¼è¥¿äºš|å°åº¦å°¼è¥¿äº|å°å°¼|é›…åŠ è¾¾|é›…åŠ é”|ğŸ‡®ğŸ‡©|Indonesia|Jakarta|(?:^|[|/Â·?][ ]*)ID(?:[ ]*(?:[|/_Â·?-]|[0-9])|$)|(?:^|[^A-Za-z0-9])IDN(?:[^A-Za-z]|$))",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/id.svg"
         },
         {
             name: "IN",
-            regex: "(?i)(Ó¡¶È([^Äá]|$)|ĞÂµÂÀï|ÃÏÂò|ÃÏÙI|°à¼ÓÂŞ¶û|°à¼ÓÁ_ –|??|(^|[^A-Za-z])India([^A-Za-z]|$)|Mumbai|Delhi|Bangalore|(?:^|[^A-Za-z0-9])(?:IN|IND)(?:[^A-Za-z]|$))",
+            regex: "(?i)(å°åº¦([^å°¼]|$)|æ–°å¾·é‡Œ|å­Ÿä¹°|å­Ÿè²·|ç­åŠ ç½—å°”|ç­åŠ ç¾…çˆ¾|ğŸ‡®ğŸ‡³|(^|[^A-Za-z])India([^A-Za-z]|$)|Mumbai|Delhi|Bangalore|(?:^|[^A-Za-z0-9])(?:IN|IND)(?:[^A-Za-z]|$))",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/in.svg"
         },
         {
             name: "JP",
-            regex: "(?i)(ÈÕ±¾|¶«¾©|–|¾©|´óÚæ|??|(^|[^A-Za-z])JP([^A-Za-z]|$)|(^|[^A-Za-z])JPN([^A-Za-z]|$)|Japan)",
+            regex: "(?i)(æ—¥æœ¬|ä¸œäº¬|æ±äº¬|å¤§é˜ª|ğŸ‡¯ğŸ‡µ|(^|[^A-Za-z])JP([^A-Za-z]|$)|(^|[^A-Za-z])JPN([^A-Za-z]|$)|Japan)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/jp.svg"
         },
         {
             name: "KR",
-            regex: "(?i)(º«¹ú|ín¹ú|ÄÏº«|ÄÏín|Ê×¶û|Ê× –|??|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
+            regex: "(?i)(éŸ©å›½|éŸ“å›½|å—éŸ©|å—éŸ“|é¦–å°”|é¦–çˆ¾|ğŸ‡°ğŸ‡·|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/kr.svg"
         },
         {
             name: "MY",
-            regex: "(?i)(ÂíÀ´Î÷ÑÇ|ñRíÎ÷†|¼ªÂ¡ÆÂ|??|(^|[^A-Za-z])MY([^A-Za-z]|$)|(^|[^A-Za-z])MYS([^A-Za-z]|$)|Malaysia)",
+            regex: "(?i)(é©¬æ¥è¥¿äºš|é¦¬ä¾†è¥¿äº|å‰éš†å¡|ğŸ‡²ğŸ‡¾|(^|[^A-Za-z])MY([^A-Za-z]|$)|(^|[^A-Za-z])MYS([^A-Za-z]|$)|Malaysia)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/my.svg"
         },
         {
             name: "NL",
-            regex: "(?i)(ºÉÀ¼|ºÉÌm|°¢Ä·Ë¹ÌØµ¤|??|(^|[^A-Za-z])NL([^A-Za-z]|$)|(^|[^A-Za-z])NLD([^A-Za-z]|$)|Netherlands|Amsterdam)",
+            regex: "(?i)(è·å…°|è·è˜­|é˜¿å§†æ–¯ç‰¹ä¸¹|ğŸ‡³ğŸ‡±|(^|[^A-Za-z])NL([^A-Za-z]|$)|(^|[^A-Za-z])NLD([^A-Za-z]|$)|Netherlands|Amsterdam)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/nl.svg"
         },
         {
             name: "PH",
-            regex: "(?i)(·ÆÂÉ±ö|·ÆÂÉÙe|ÂíÄáÀ­|ñRÄáÀ­|ËŞÎñ|ËŞìF|??|(^|[^A-Za-z])PH([^A-Za-z]|$)|(^|[^A-Za-z])PHL([^A-Za-z]|$)|Philippines|Manila|Cebu)",
+            regex: "(?i)(è²å¾‹å®¾|è²å¾‹è³“|é©¬å°¼æ‹‰|é¦¬å°¼æ‹‰|å®¿åŠ¡|å®¿éœ§|ğŸ‡µğŸ‡­|(^|[^A-Za-z])PH([^A-Za-z]|$)|(^|[^A-Za-z])PHL([^A-Za-z]|$)|Philippines|Manila|Cebu)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/ph.svg"
         },
         {
             name: "SG",
-            regex: "(?i)(ĞÂ¼ÓÆÂ|Ê¨³Ç|ª{³Ç|??|(^|[^A-Za-z])SG([^A-Za-z]|$)|(^|[^A-Za-z])SGP([^A-Za-z]|$)|Singapore)",
+            regex: "(?i)(æ–°åŠ å¡|ç‹®åŸ|ç…åŸ|ğŸ‡¸ğŸ‡¬|(^|[^A-Za-z])SG([^A-Za-z]|$)|(^|[^A-Za-z])SGP([^A-Za-z]|$)|Singapore)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/sg.svg"
         },
         {
             name: "TH",
-            regex: "(?i)(Ì©¹ú|Ì©‡ø|Âü¹È|??|Thailand|Bangkok|(?:^|[^A-Za-z0-9])(?:TH|THA)(?:[^A-Za-z]|$))",
+            regex: "(?i)(æ³°å›½|æ³°åœ‹|æ›¼è°·|ğŸ‡¹ğŸ‡­|Thailand|Bangkok|(?:^|[^A-Za-z0-9])(?:TH|THA)(?:[^A-Za-z]|$))",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/th.svg"
         },
         {
             name: "TW",
-            regex: "(?i)(Ì¨Íå|Ì¨³|Ì¨±±|ĞÂ±±|??|(^|[^A-Za-z])TW([^A-Za-z]|$)|(^|[^A-Za-z])TWN([^A-Za-z]|$)|Taiwan)",
+            regex: "(?i)(å°æ¹¾|å°ç£|å°åŒ—|æ–°åŒ—|ğŸ‡¹ğŸ‡¼|(^|[^A-Za-z])TW([^A-Za-z]|$)|(^|[^A-Za-z])TWN([^A-Za-z]|$)|Taiwan)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/tw.svg"
         },
         {
             name: "US",
-            regex: "(?i)(ÃÀ¹ú|ÃÀ‡ø|ÂåÉ¼í¶|ÂåÉ¼´‰|Ê¥ºÎÈû|Â}ºÎÈû|¹è¹È|Îù¹È|Î÷ÑÅÍ¼|Î÷ÑÅˆD|Å¦Ô¼|¼~¼s|??|(^|[^A-Za-z])US([^A-Za-z]|$)|(^|[^A-Za-z])USA([^A-Za-z]|$)|United[ -]?States)",
+            regex: "(?i)(ç¾å›½|ç¾åœ‹|æ´›æ‰çŸ¶|æ´›æ‰ç£¯|åœ£ä½•å¡|è–ä½•å¡|ç¡…è°·|çŸ½è°·|è¥¿é›…å›¾|è¥¿é›…åœ–|çº½çº¦|ç´ç´„|ğŸ‡ºğŸ‡¸|(^|[^A-Za-z])US([^A-Za-z]|$)|(^|[^A-Za-z])USA([^A-Za-z]|$)|United[ -]?States)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/us.svg"
         },
         {
             name: "VN",
-            regex: "(?i)(Ô½ÄÏ|ºÓÄÚ|ºÓƒÈ|ºúÖ¾Ã÷|??|(^|[^A-Za-z])VN([^A-Za-z]|$)|(^|[^A-Za-z])VNM([^A-Za-z]|$)|Viet[ -]?Nam|Hanoi|Ho[ -]?Chi[ -]?Minh)",
+            regex: "(?i)(è¶Šå—|æ²³å†…|æ²³å…§|èƒ¡å¿—æ˜|ğŸ‡»ğŸ‡³|(^|[^A-Za-z])VN([^A-Za-z]|$)|(^|[^A-Za-z])VNM([^A-Za-z]|$)|Viet[ -]?Nam|Hanoi|Ho[ -]?Chi[ -]?Minh)",
             icon: "https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/vn.svg"
         }
     ];
@@ -218,20 +232,15 @@ delete params["global-client-fingerprint"];
     const toJsRegex = goStyleRegex =>
         new RegExp(goStyleRegex.replace(/^\(\?i\)/, ""), "i");
 
-    const getLocalRegexes = region =>
-        region.localRegexes
-            ? region.localRegexes.map(
-                ({ source, flags }) => new RegExp(source, flags)
-            )
-            : [toJsRegex(region.regex)];
+    const getLocalRegexes = region => [toJsRegex(region.regex)];
 
     const allProxies = (params.proxies || []).filter(
         proxy => proxy.type !== "direct"
     );
 
     /*
-     * ¼ì²éÊÇ·ñ´æÔÚÔ¶³Ì½ÚµãÌá¹©Æ÷¡£
-     * ´æÔÚÊ±±£ÁôÈ«²¿ºòÑ¡¹ú¼Ò×é£¬·ÀÖ¹ÒÅÂ©ÉĞÎ´Õ¹¿ªµÄÔ¶³Ì½Úµã¡£
+     * æ£€æŸ¥æ˜¯å¦å­˜åœ¨è¿œç¨‹èŠ‚ç‚¹æä¾›å™¨ã€‚
+     * å­˜åœ¨æ—¶ä¿ç•™å…¨éƒ¨å€™é€‰å›½å®¶ç»„ï¼Œé˜²æ­¢é—æ¼å°šæœªå±•å¼€çš„è¿œç¨‹èŠ‚ç‚¹ã€‚
      */
     const hasProxyProviders =
         Object.keys(params["proxy-providers"] || {}).length > 0;
@@ -248,9 +257,9 @@ delete params["global-client-fingerprint"];
     });
 
     /*
-     * Ã»ÓĞÔ¶³Ì½ÚµãÌá¹©Æ÷Ê±£¬Ö»Éú³ÉÊµ¼ÊÆ¥Åäµ½µÄ¹ú¼Ò×é¡£
-     * ´æÔÚÔ¶³Ì½ÚµãÌá¹©Æ÷Ê±£¬±£ÁôÈ«²¿ºòÑ¡¹ú¼Ò×é£¬
-     * µÈÄÚºËÔØÈëÔ¶³Ì½ÚµãºóÔÙ°´Ãû³Æ¹ıÂË¡£
+     * æ²¡æœ‰è¿œç¨‹èŠ‚ç‚¹æä¾›å™¨æ—¶ï¼Œåªç”Ÿæˆå®é™…åŒ¹é…åˆ°çš„å›½å®¶ç»„ã€‚
+     * å­˜åœ¨è¿œç¨‹èŠ‚ç‚¹æä¾›å™¨æ—¶ï¼Œä¿ç•™å…¨éƒ¨å€™é€‰å›½å®¶ç»„ï¼Œ
+     * ç­‰å†…æ ¸è½½å…¥è¿œç¨‹èŠ‚ç‚¹åå†æŒ‰åç§°è¿‡æ»¤ã€‚
      */
     const activeRegions = hasProxyProviders
         ? regions
@@ -261,25 +270,25 @@ delete params["global-client-fingerprint"];
     let groups = [];
 
     groups.push({
-        name: "Ö÷´úÀí",
+        name: "ä¸»ä»£ç†",
         type: "select",
         icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Proxy.png",
         proxies: hasActiveRegions
-            ? ["×Ô¶¯", "¾²Ì¬", "DIRECT"]
-            : ["¾²Ì¬", "DIRECT"]
+            ? ["è‡ªåŠ¨", "é™æ€", "DIRECT"]
+            : ["é™æ€", "DIRECT"]
     });
 
     if (hasActiveRegions) {
         groups.push({
-            name: "×Ô¶¯",
+            name: "è‡ªåŠ¨",
             type: "select",
             icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Auto.png",
-            proxies: activeRegions.map(region => `${region.name} ×Ô¶¯`)
+            proxies: activeRegions.map(region => `${region.name} è‡ªåŠ¨`)
         });
     }
 
     groups.push({
-        name: "¾²Ì¬",
+        name: "é™æ€",
         type: "select",
         icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Static.png",
         "include-all": true,
@@ -288,11 +297,19 @@ delete params["global-client-fingerprint"];
         "empty-fallback": "REJECT"
     });
 
+    /*
+     * åº”ç”¨åˆ†æµç»„ï¼šå–æ¶ˆæ‰€æœ‰é™æ€ç»„ï¼Œç›´æ¥å†…è”å…¨éƒ¨èŠ‚ç‚¹åˆ—è¡¨ã€‚
+     * å¤ç”¨ excludeFilter è¿‡æ»¤æµé‡/åˆ°æœŸç­‰å·¥å…·èŠ‚ç‚¹ã€‚
+     */
+    const allProxyNames = allProxies
+        .filter(proxy => !excludeRe.test(proxy.name))
+        .map(proxy => proxy.name);
+
     const appProxiesList = [
-        "Ö÷´úÀí",
+        "ä¸»ä»£ç†",
         "DIRECT",
-        ...activeRegions.map(region => `${region.name} ×Ô¶¯`),
-        ...allProxies.map(proxy => proxy.name)
+        ...activeRegions.map(region => `${region.name} è‡ªåŠ¨`),
+        ...allProxyNames
     ];
 
     const apps = [
@@ -347,10 +364,7 @@ delete params["global-client-fingerprint"];
             name: app.name,
             type: "select",
             icon: icon,
-            proxies: appProxiesList,
-            ...(hasProxyProviders
-                ? { use: Object.keys(params["proxy-providers"] || {}) }
-                : {})
+            proxies: appProxiesList
         });
     });
 
@@ -358,7 +372,7 @@ delete params["global-client-fingerprint"];
         const regionIcon = region.icon;
 
         groups.push({
-            name: `${region.name} ×Ô¶¯`,
+            name: `${region.name} è‡ªåŠ¨`,
             type: "url-test",
             hidden: true,
             icon: regionIcon,
@@ -375,7 +389,6 @@ delete params["global-client-fingerprint"];
             "max-failed-times": 5,
             "expected-status": 204
         });
-
     });
 
     params["proxy-groups"] = groups;
@@ -384,15 +397,15 @@ delete params["global-client-fingerprint"];
 
     params["rules"] = [
         /*
-         * Ë½ÓĞÍøÂçÓë¹ã¸æÀ¹½Ø¡£
+         * ç§æœ‰ç½‘ç»œä¸å¹¿å‘Šæ‹¦æˆªã€‚
          */
         "GEOSITE,private,DIRECT",
         "GEOIP,private,DIRECT,no-resolve",
         "GEOSITE,category-ads-all,REJECT",
 
         /*
-         * ¶ÀÁ¢²úÆ·ºÍ×Ó²úÆ·¹æÔò¡£
-         * ±ØĞë·ÅÔÚ´ó³§Í¨ÓÃ¹æÔòÖ®Ç°¡£
+         * ç‹¬ç«‹äº§å“å’Œå­äº§å“è§„åˆ™ã€‚
+         * å¿…é¡»æ”¾åœ¨å¤§å‚é€šç”¨è§„åˆ™ä¹‹å‰ã€‚
          */
         "GEOSITE,youtube,YouTube",
         "GEOSITE,twitch,Twitch",
@@ -403,12 +416,12 @@ delete params["global-client-fingerprint"];
         "GEOSITE,github,GitHub",
 
         /*
-         * TV Á÷Ã½Ìå£º
-         * Netflix¡¢Disney+¡¢Amazon Prime Video¡¢
-         * Apple TV+¡¢Max/HBO¡£
+         * TV æµåª’ä½“ï¼š
+         * Netflixã€Disney+ã€Amazon Prime Videoã€
+         * Apple TV+ã€Max/HBOã€‚
          *
-         * Apple TV+ Î»ÓÚ Apple Í¨ÓÃ¹æÔòÖ®Ç°£¬
-         * ·ÀÖ¹±» Apple ·Ö×éÌáÇ°Æ¥Åä¡£
+         * Apple TV+ ä½äº Apple é€šç”¨è§„åˆ™ä¹‹å‰ï¼Œ
+         * é˜²æ­¢è¢« Apple åˆ†ç»„æå‰åŒ¹é…ã€‚
          */
         "GEOSITE,netflix,TV",
         "GEOSITE,disney,TV",
@@ -418,31 +431,31 @@ delete params["global-client-fingerprint"];
         "GEOSITE,hbo,TV",
 
         /*
-         * ´ó³§Í¨ÓÃ¹æÔò¡£
+         * å¤§å‚é€šç”¨è§„åˆ™ã€‚
          *
-         * YouTube ÒÑÔÚ Google Ç°Ãæ£»
-         * Apple TV+ ÒÑÔÚ Apple Ç°Ãæ£»
-         * GitHub ÒÑÔÚ Microsoft Ç°Ãæ¡£
+         * YouTube å·²åœ¨ Google å‰é¢ï¼›
+         * Apple TV+ å·²åœ¨ Apple å‰é¢ï¼›
+         * GitHub å·²åœ¨ Microsoft å‰é¢ã€‚
          *
-         * ×¢Òâ£º·ÅÔÚ cn Ö±Á¬Ö®Ç°£¬
-         * ·ÀÖ¹ Google/Apple/Microsoft ÓòÃû±» geosite:cn ÎóÅĞºóÖ±Á¬£¬
-         * µ¼ÖÂ Google Play µÈÏÂÔØÊ§°Ü¡£
+         * æ³¨æ„ï¼šæ”¾åœ¨ cn ç›´è¿ä¹‹å‰ï¼Œ
+         * é˜²æ­¢ Google/Apple/Microsoft åŸŸåè¢« geosite:cn è¯¯åˆ¤åç›´è¿ï¼Œ
+         * å¯¼è‡´ Google Play ç­‰ä¸‹è½½å¤±è´¥ã€‚
          */
         "GEOSITE,google,Google",
         "GEOSITE,apple,Apple",
         "GEOSITE,microsoft,Microsoft",
 
         /*
-         * ÖĞ¹ú´óÂ½ÓòÃûÓë IP Ö±Á¬¡£
-         * ÒÑÒÆµ½×îµ×²¿£¬½öÔÚÎ´±»ÉÏÊö¹æÔòÆ¥ÅäÊ±²ÅÉúĞ§¡£
+         * ä¸­å›½å¤§é™†åŸŸåä¸ IP ç›´è¿ã€‚
+         * å·²ç§»åˆ°æœ€åº•éƒ¨ï¼Œä»…åœ¨æœªè¢«ä¸Šè¿°è§„åˆ™åŒ¹é…æ—¶æ‰ç”Ÿæ•ˆã€‚
          */
         "GEOSITE,cn,DIRECT",
         "GEOIP,cn,DIRECT,no-resolve",
 
         /*
-         * ×îÖÕ¶µµ×¡£
+         * æœ€ç»ˆå…œåº•ã€‚
          */
-        "MATCH,Ö÷´úÀí"
+        "MATCH,ä¸»ä»£ç†"
     ];
 
     return params;
