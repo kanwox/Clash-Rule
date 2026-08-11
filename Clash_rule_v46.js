@@ -350,6 +350,10 @@ delete params["global-client-fingerprint"];
             icon: "twitch.png"
         },
         {
+            name: "X",
+            icon: "x.png"
+        },
+        {
             name: "YouTube",
             icon: "youtube.png"
         }
@@ -409,6 +413,7 @@ delete params["global-client-fingerprint"];
          */
         "GEOSITE,youtube,YouTube",
         "GEOSITE,twitch,Twitch",
+        "GEOSITE,twitter,X",
         "GEOSITE,tiktok,TikTok",
         "GEOSITE,telegram,Telegram",
         "GEOIP,telegram,Telegram,no-resolve",
