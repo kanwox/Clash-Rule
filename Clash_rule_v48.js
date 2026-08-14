@@ -396,12 +396,6 @@ function main(params) {
         });
     });
 
-    groups.forEach(g => {
-        if (Array.isArray(g.proxies) && g.proxies.length === 0) {
-            g.proxies = ["DIRECT"];
-        }
-    });
-
     params["proxy-groups"] = groups;
     delete params["rule-providers"];
 
@@ -467,8 +461,7 @@ function buildProviders(urls) {
                 interval: 300
             },
             override: {
-                "additional-prefix": tag + sup(i + 1),
-                "ip-version": "ipv4-prefer"
+                "additional-prefix": tag + sup(i + 1)
             }
         };
     }
