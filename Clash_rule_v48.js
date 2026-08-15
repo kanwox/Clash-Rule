@@ -62,6 +62,7 @@ function main(params) {
     };
 
     const subDNS = params.dns || {};
+    const subPSN = [].concat(subDNS["proxy-server-nameserver"] || []);
     const subPolicy = Object.assign({}, subDNS["nameserver-policy"] || {});
     const subFilter = [].concat(subDNS["fake-ip-filter"] || []);
     
@@ -101,8 +102,12 @@ function main(params) {
             "119.29.29.29"
         ],
         "proxy-server-nameserver": [
-            "https://223.5.5.5/dns-query",
-            "https://doh.pub/dns-query"
+            ...new Set([
+                ...subPSN,
+                "https://223.5.5.5/dns-query",
+                "https://doh.pub/dns-query",
+                "https://1.1.1.1/dns-query"
+            ])
         ],
         "nameserver": [
             "https://1.1.1.1/dns-query#主代理",
