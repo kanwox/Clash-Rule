@@ -8,7 +8,7 @@ function main(params) {
         "mode": "rule",
         "log-level": "warning",
         "unified-delay": true,
-        "tcp-concurrent": false,
+        "tcp-concurrent": true,
         "geodata-mode": true,
         "geo-auto-update": true,
         "geo-update-interval": 720,
