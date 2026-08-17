@@ -1,4 +1,4 @@
-function main(params) {
+﻿function main(params) {
     if (!params || typeof params !== "object") params = {};
     if (!Array.isArray(params.proxies)) params.proxies = [];
 
