@@ -57,6 +57,7 @@
 
     const subDNS = params.dns || {};
     const subPSN = [].concat(subDNS["proxy-server-nameserver"] || []);
+    const subNS = [].concat(subDNS["nameserver"] || []);
     const subPolicy = Object.assign({}, subDNS["nameserver-policy"] || {});
     const subFilter = [].concat(subDNS["fake-ip-filter"] || []);
 
@@ -96,18 +97,21 @@
             "223.5.5.5",
             "119.29.29.29"
         ],
-        "proxy-server-nameserver": [
-            ...new Set([
-                ...subPSN,
+        // 机场优先、独占不混用：机场指定了节点解析 DNS 就只用机场的，
+        // 避免公共 DNS 并发抢答把专线隐蔽域名解析成错误的落地 IP；机场没指定才用国内 DoH 兜底
+        "proxy-server-nameserver": subPSN.length > 0
+            ? [...new Set(subPSN)]
+            : [
                 "https://223.5.5.5/dns-query",
-                "https://doh.pub/dns-query",
-                "https://1.1.1.1/dns-query"
-            ])
-        ],
-        "nameserver": [
-            "https://1.1.1.1/dns-query#主代理",
-            "https://8.8.8.8/dns-query#主代理"
-        ],
+                "https://doh.pub/dns-query"
+            ],
+        // 主解析同理：机场指定了 DNS 就独占使用；否则用规则默认（走主代理隧道查询）兜底
+        "nameserver": subNS.length > 0
+            ? [...new Set(subNS)]
+            : [
+                "https://1.1.1.1/dns-query#主代理",
+                "https://8.8.8.8/dns-query#主代理"
+            ],
         "nameserver-policy": Object.assign({}, subPolicy, {
             "geosite:private": [
                 "system://"
@@ -290,19 +294,9 @@
         type: "select",
         icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Proxy.png",
         proxies: hasActiveRegions
-            ? ["自动", "静态", "直连"]
+            ? [...activeRegions.map(region => `${region.name}`), "静态", "直连"]
             : ["静态", "直连"]
     });
-
-    // 自动
-    if (hasActiveRegions) {
-        groups.push({
-            name: "自动",
-            type: "select",
-            icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Auto.png",
-            proxies: activeRegions.map(region => `${region.name} 自动`)
-        });
-    }
 
     // 静态
     groups.push({
@@ -328,7 +322,7 @@
     const appProxiesList = [
         "主代理",
         "直连",
-        ...activeRegions.map(region => `${region.name} 自动`)
+        ...activeRegions.map(region => `${region.name}`)
     ];
 
     const apps = [
@@ -364,7 +358,7 @@
     // 国家测速组（全隐藏）
     activeRegions.forEach(region => {
         groups.push({
-            name: `${region.name} 自动`,
+            name: `${region.name}`,
             type: "url-test",
             hidden: true,
             icon: region.icon,
