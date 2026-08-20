@@ -1,4 +1,4 @@
-﻿function main(params) {
+function main(params) {
     if (!params || typeof params !== "object") params = {};
     if (!Array.isArray(params.proxies)) params.proxies = [];
 
@@ -68,7 +68,7 @@
     params["dns"] = {
         "enable": true,
         "listen": "127.0.0.1:1053",
-        "ipv6": true,
+        "ipv6": false, // 关闭 DNS 层 IPv6（与顶层 ipv6 无关），避免下发 fake-ip6 (fc00::/16) 被 Chrome 误判成局域网地址而拦截
         "prefer-h3": true,
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
@@ -109,8 +109,8 @@
         "nameserver": subNS.length > 0
             ? [...new Set(subNS)]
             : [
-                "https://1.1.1.1/dns-query#主代理",
-                "https://8.8.8.8/dns-query#主代理"
+                "https://1.1.1.1/dns-query#DNS出口",
+                "https://8.8.8.8/dns-query#DNS出口"
             ],
         "nameserver-policy": Object.assign({}, subPolicy, {
             "geosite:private": [
@@ -129,7 +129,7 @@
     const FP_OK = ["vless", "vmess", "trojan"];
     (params.proxies || []).forEach(proxy => {
         if (!proxy) return;
-        if (proxy.type !== "direct") proxy["ip-version"] = "ipv4-prefer";
+        if (proxy.type !== "direct" && !("ip-version" in proxy)) proxy["ip-version"] = "ipv4-prefer";
         if (FP_OK.indexOf(proxy.type) !== -1 && !proxy["client-fingerprint"]) {
             const usesTLS = proxy.type === "trojan" || proxy.tls === true || proxy["reality-opts"];
             if (usesTLS) proxy["client-fingerprint"] = "chrome";
@@ -141,7 +141,12 @@
     Object.values(params["proxy-providers"] || {}).forEach(provider => {
         if (provider && typeof provider === "object") {
             provider.override = Object.assign({}, provider.override || {}, {
-                "ip-version": "ipv4-prefer"
+                "ip-version": "ipv4-prefer",
+                "override-expr": [
+                    ...(((provider.override || {})["override-expr"]) || []),
+                    '(select(.type == "trojan" or ((.type == "vless" or .type == "vmess") and (.tls == true or has("reality-opts")))) | select(has("client-fingerprint") | not) | .client-fingerprint) = "chrome"',
+                    '(select(has("reality-opts")) | select(.reality-opts | has("support-x25519mlkem768") | not) | .reality-opts.support-x25519mlkem768) = true'
+                ]
             });
         }
     });
@@ -296,6 +301,26 @@
         proxies: hasActiveRegions
             ? [...activeRegions.map(region => `${region.name}`), "静态", "直连"]
             : ["静态", "直连"]
+    });
+
+    // 专供 DNS 查询使用的出口：内容和主代理一致，但不含"直连"，
+    // 避免用户手动把"主代理"切成直连时 DNS 查询跟着走直连（国内易超时/污染）。
+    // 用 url-test 自动选优，而不是 select，避免这个隐藏分组长期停在默认第一个（可能不稳定的）节点上。
+    groups.push({
+        name: "DNS出口",
+        type: "url-test",
+        hidden: true,
+        icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Proxy.png",
+        proxies: hasActiveRegions
+            ? [...activeRegions.map(region => `${region.name}`), "静态"]
+            : ["静态"],
+        "url": "https://www.gstatic.com/generate_204",
+        "interval": 300,
+        "tolerance": 30,
+        "lazy": true,
+        "timeout": 5000,
+        "max-failed-times": 5,
+        "expected-status": 204
     });
 
     // 静态
