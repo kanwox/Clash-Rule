@@ -109,8 +109,8 @@ function main(params) {
         "nameserver": subNS.length > 0
             ? [...new Set(subNS)]
             : [
-                "https://1.1.1.1/dns-query#DNS出口",
-                "https://8.8.8.8/dns-query#DNS出口"
+                "https://1.1.1.1/dns-query#主代理",
+                "https://8.8.8.8/dns-query#主代理"
             ],
         "nameserver-policy": Object.assign({}, subPolicy, {
             "geosite:private": [
@@ -301,26 +301,6 @@ function main(params) {
         proxies: hasActiveRegions
             ? [...activeRegions.map(region => `${region.name}`), "静态", "直连"]
             : ["静态", "直连"]
-    });
-
-    // 专供 DNS 查询使用的出口：内容和主代理一致，但不含"直连"，
-    // 避免用户手动把"主代理"切成直连时 DNS 查询跟着走直连（国内易超时/污染）。
-    // 用 url-test 自动选优，而不是 select，避免这个隐藏分组长期停在默认第一个（可能不稳定的）节点上。
-    groups.push({
-        name: "DNS出口",
-        type: "url-test",
-        hidden: true,
-        icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Proxy.png",
-        proxies: hasActiveRegions
-            ? [...activeRegions.map(region => `${region.name}`), "静态"]
-            : ["静态"],
-        "url": "https://www.gstatic.com/generate_204",
-        "interval": 300,
-        "tolerance": 30,
-        "lazy": true,
-        "timeout": 5000,
-        "max-failed-times": 5,
-        "expected-status": 204
     });
 
     // 静态
