@@ -1,1 +1,1 @@
-# c
+脚本：https://raw.githubusercontent.com/kanwox/Clash-Rule/refs/heads/main/Clash_rule.js
