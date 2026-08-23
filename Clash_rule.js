@@ -333,7 +333,7 @@ function main(params) {
         },
         {
             name: "KR",
-            regex: "(?i)(韩国|韓国|南韩|南韓|首尔|首|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
+            regex: "(?i)(韩国|韓国|南韩|南韓|首尔|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
             icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/kr.svg"
         },
         {
