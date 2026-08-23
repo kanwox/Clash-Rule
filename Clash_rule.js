@@ -1,4 +1,4 @@
-// Clash_rule.js v5.1
+// Clash_rule.js v5.2
 // 注意：需较新的 mihomo 内核；首次启动需联网下载规则集，请在日志中确认全部下载成功。
 
 function main(params) {
@@ -17,6 +17,10 @@ function main(params) {
         "tcp-concurrent": true,
         "ipv6": true,
         "find-process-mode": "off",
+        // TCP 保活调优：内核默认间隔仅 15s，移动端费电且长连接易被 NAT 提前掐断；
+        // 300/30 为省电与响应速度的折中值
+        "keep-alive-idle": 300,
+        "keep-alive-interval": 30,
         "profile": {
             "store-selected": true,
             "store-fake-ip": true
@@ -28,7 +32,9 @@ function main(params) {
     params["sniffer"] = {
         "enable": true,
         "force-dns-mapping": true,
-        "parse-pure-ip": false,
+        // 对拿不到域名的纯 IP 流量强制嗅探：应用绕过系统 DNS 自行解析后直连 IP 时，
+        // 从 TLS SNI / HTTP Host 还原出域名参与正常分流，避免落到 cn-ip/MATCH 兜底误判
+        "parse-pure-ip": true,
         "override-destination": true,
         "sniff": {
             "HTTP": {
@@ -53,13 +59,41 @@ function main(params) {
     };
 
     const subDNS = params.dns || {};
-    const subPSN = [].concat(subDNS["proxy-server-nameserver"] || []);
-    const subNS = [].concat(subDNS["nameserver"] || []);
+
+    // ── 订阅 DNS 悬空引用清洗 ──
+    // 本脚本会整体重建 rule-providers 与全部策略组，订阅自带配置里指向它们的
+    // rule-set:/geosite: 引用和 "#某组名" 后缀若原样并入，内核会因找不到目标而报错。
+    // geosite: 引用还会触发内核额外下载 geo 文件，与本脚本无 geo 数据的设计冲突。
+    // （脚本自己的 rule-set 引用在下方独立写入，不受此清洗影响）
+    // 本脚本固定生成的组名（App 组名需与下方 apps 数组保持同步）
+    const OWN_GROUPS = ["主代理", "静态", "直连", "AI", "Apple", "GitHub", "Google", "Microsoft",
+                        "Telegram", "TikTok", "TV", "Twitch", "X", "YouTube"];
+    // 内建策略 + 地区组名（23 个两位大写地区码，需与下方 regions 数组保持同步）
+    const BUILTIN_POLICIES = new Set(["DIRECT", "REJECT", "REJECT-DROP", "PASS", "GLOBAL"]);
+    const REGION_CODES = new Set(["AE", "AR", "AU", "BD", "BR", "CA", "DE", "FR", "GB", "HK", "ID",
+                                  "IN", "JP", "KR", "MY", "NL", "PH", "SG", "TH", "TR", "TW", "US", "VN"]);
+    // 校验 DNS 条目尾部 "#目标" 后缀：合法则整条保留，
+    // 无效（指向已被删除的组）则剥掉、该条 DNS 回落直连（安全默认）
+    const refValid = ref => BUILTIN_POLICIES.has(ref)
+        || OWN_GROUPS.indexOf(ref) !== -1
+        || REGION_CODES.has(ref);
+    const stripDanglingRef = entry => {
+        const s = String(entry);
+        const hash = s.indexOf("#");
+        if (hash === -1) return s;
+        return refValid(s.slice(hash + 1).split("&")[0].trim()) ? s : s.slice(0, hash);
+    };
+
+    const subPSN = [].concat(subDNS["proxy-server-nameserver"] || []).map(stripDanglingRef);
+    const subNS = [].concat(subDNS["nameserver"] || []).map(stripDanglingRef);
     const subPolicy = Object.assign({}, subDNS["nameserver-policy"] || {});
-    const subFilter = [].concat(subDNS["fake-ip-filter"] || []);
+    const subFilter = [].concat(subDNS["fake-ip-filter"] || []).filter(item =>
+        !/^(rule-set|geosite):/i.test(String(item))
+    );
 
     for (const k of Object.keys(subPolicy)) {
-        if (k === "+." || k === "*" || k === "+") delete subPolicy[k];
+        if (k === "+." || k === "*" || k === "+") delete subPolicy[k];      // 通吃键架空分流，丢弃
+        else if (/^(rule-set|geosite):/i.test(k)) delete subPolicy[k];      // 指向已重建的规则集，丢弃
     }
 
     params["dns"] = {
@@ -69,7 +103,8 @@ function main(params) {
         "prefer-h3": true,
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
-        "fake-ip-range6": "fc00::/16",
+        // IPv6 fake-ip 段：官方示例的文档专用段；勿改用 fc00::/7 等内网保留地址，避免与真实局域网冲突
+        "fake-ip-range6": "fdfe:dcba:9876::/64",
         "cache-algorithm": "arc",
         // 保留订阅自带的 hosts 能力
         "use-hosts": subDNS["use-hosts"] !== undefined ? subDNS["use-hosts"] : true,
@@ -98,12 +133,16 @@ function main(params) {
                 "+.stun.*.*.*.*",
                 "rule-set:cn-domain",
                 "rule-set:private-domain",
+                // 社区维护的 fake-ip 豁免清单兜底（连通性检测/NTP/STUN/游戏主机等），防手维护清单漏项
+                "rule-set:fakeip-filter",
                 ...subFilter
             ])
         ],
+        // 引导 DNS：仅用于解析其它 DoH 服务器的域名，明文 IP 最快且不依赖证书校验
+        // （DoT 在设备时钟不准时会因证书校验失败而失效）
         "default-nameserver": [
-            "tls://223.5.5.5",
-            "tls://119.29.29.29"
+            "223.5.5.5",
+            "119.29.29.29"
         ],
         // 机场优先、独占不混用：机场指定了节点解析 DNS 就只用机场的，
         // 避免公共 DNS 并发抢答把专线隐蔽域名解析成错误的落地 IP；机场没指定才用国内 DoH 兜底
@@ -134,15 +173,15 @@ function main(params) {
         })
     };
 
-    // 远程规则集：MetaCubeX 官方拆分库，全 mrs，更新周期一个月（2592000 秒）
+    // 远程规则集：MetaCubeX 官方拆分库，全 mrs，默认更新周期一个月（2592000 秒）
     const RS_BASE = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
-    const domainProvider = name => ({
+    const domainProvider = (name, interval = 2592000) => ({
         "type": "http",
         "behavior": "domain",
         "format": "mrs",
         "url": `${RS_BASE}/geosite/${name}.mrs`,
         "path": `./ruleset/geosite-${name}.mrs`,
-        "interval": 2592000
+        "interval": interval
     });
     const ipProvider = name => ({
         "type": "http",
@@ -180,11 +219,24 @@ function main(params) {
     };
     params["rule-providers"] = {};
     Object.keys(DOMAIN_SETS).forEach(key => {
-        params["rule-providers"][key] = domainProvider(DOMAIN_SETS[key]);
+        // 广告域名时效性最强，单独周更（7 天）；其余分类变化慢，维持月更
+        params["rule-providers"][key] = key === "ads-domain"
+            ? domainProvider(DOMAIN_SETS[key], 604800)
+            : domainProvider(DOMAIN_SETS[key]);
     });
     Object.keys(IP_SETS).forEach(key => {
         params["rule-providers"][key] = ipProvider(IP_SETS[key]);
     });
+    // 社区维护的 fake-ip 豁免清单（wwqgtxx/clash-rules，独立来源），
+    // 供上方 dns.fake-ip-filter 以 rule-set:fakeip-filter 引用
+    params["rule-providers"]["fakeip-filter"] = {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://testingcf.jsdelivr.net/gh/wwqgtxx/clash-rules@release/fakeip-filter.mrs",
+        "path": "./ruleset/fakeip-filter.mrs",
+        "interval": 2592000
+    };
 
     const FP_OK = ["vless", "vmess", "trojan"];
     (params.proxies || []).forEach(proxy => {
@@ -281,7 +333,7 @@ function main(params) {
         },
         {
             name: "KR",
-            regex: "(?i)(韩国|韓国|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
+            regex: "(?i)(韩国|韓国|南韩|南韓|首尔|首|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
             icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/kr.svg"
         },
         {
@@ -348,7 +400,7 @@ function main(params) {
     });
 
     // 订阅使用代理集合时无法在脚本期得知节点内容，维持全量地区组；
-    // 普通节点列表则按“同地区 ≥2 个节点”动态建组（恢复原语义）
+    // 普通节点列表则按“同地区 ≥2 个节点”动态建组
     const activeRegions = subHasProviders ? regions : matchedRegions;
     const hasActiveRegions = activeRegions.length > 0;
 
