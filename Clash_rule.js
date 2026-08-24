@@ -92,8 +92,9 @@ function main(params) {
     );
 
     for (const k of Object.keys(subPolicy)) {
-        if (k === "+." || k === "*" || k === "+") delete subPolicy[k];      // 通吃键架空分流，丢弃
-        else if (/^(rule-set|geosite):/i.test(k)) delete subPolicy[k];      // 指向已重建的规则集，丢弃
+        if (k === "+." || k === "*" || k === "+") { delete subPolicy[k]; continue; }    // 通吃键架空分流，丢弃
+        if (/^(rule-set|geosite):/i.test(k)) { delete subPolicy[k]; continue; }         // 指向已重建的规则集，丢弃
+        subPolicy[k] = [].concat(subPolicy[k]).map(stripDanglingRef);                   // 值里的 "#组名" 悬空引用同样清洗
     }
 
     params["dns"] = {
@@ -323,7 +324,7 @@ function main(params) {
         },
         {
             name: "IN",
-            regex: "(?i)(印度([^尼]|$)|新德里|孟买|孟買|班加罗尔|班加羅爾|🇮🇳|(^|[^A-Za-z])India([^A-Za-z]|$)|Mumbai|Delhi|Bangalore|(?:^|[^A-Za-z0-9])(?:IN|IND)(?:[^A-Za-z]|$))",
+            regex: "(?i)(印度([^尼]|$)|新德里|孟买|孟買|班加罗尔|班加羅爾|🇮🇳|(^|[^A-Za-z])India([^A-Za-z]|$)|Mumbai|Delhi|Bangalore|(^|[^A-Za-z])IN([^A-Za-z]|$)|(^|[^A-Za-z])IND([^A-Za-z]|$))",
             icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/in.svg"
         },
         {
@@ -333,7 +334,7 @@ function main(params) {
         },
         {
             name: "KR",
-            regex: "(?i)(韩国|韓国|南韩|南韓|首尔|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
+            regex: "(?i)(韩国|韓国|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
             icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/kr.svg"
         },
         {
@@ -358,12 +359,12 @@ function main(params) {
         },
         {
             name: "TH",
-            regex: "(?i)(泰国|泰國|曼谷|🇹🇭|Thailand|Bangkok|(?:^|[^A-Za-z0-9])(?:TH|THA)(?:[^A-Za-z]|$))",
+            regex: "(?i)(泰国|泰國|曼谷|🇹🇭|Thailand|Bangkok|(^|[^A-Za-z])TH([^A-Za-z]|$)|(^|[^A-Za-z])THA([^A-Za-z]|$))",
             icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/th.svg"
         },
         {
             name: "TR",
-            regex: "(?i)(土耳其|伊斯坦布尔|🇹🇷|Turkey|Türkiye|Istanbul)",
+            regex: "(?i)(土耳其|伊斯坦布尔|🇹🇷|(^|[^A-Za-z])TR([^A-Za-z]|$)|(^|[^A-Za-z])TUR([^A-Za-z]|$)|Turkey|Türkiye|Istanbul)",
             icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/tr.svg"
         },
         {
@@ -515,7 +516,6 @@ function main(params) {
         "RULE-SET,disney-domain,TV",
         "RULE-SET,primevideo-domain,TV",
         "RULE-SET,appletv-domain,TV",
-        "DOMAIN-SUFFIX,max.com,TV",
         "RULE-SET,hbo-domain,TV",
 
         "RULE-SET,google-domain,Google",
