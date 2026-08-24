@@ -433,6 +433,7 @@ function main(params) {
         name: "直连",
         type: "select",
         hidden: true,
+        icon: "https://testingcf.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Direct.png",
         proxies: ["DIRECT"],
         url: "http://connect.rom.miui.com/generate_204"
     });
