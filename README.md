@@ -14,7 +14,7 @@ https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js
 
 **🔀 分流**
 - 广告拦截（REJECT，不产生任何流量）
-- 11 个应用独立分流：AI / Apple / GitHub / Google / Microsoft / Spotify / Telegram / TikTok / TV（Netflix·Disney+·HBO·Prime Video·Apple TV+）/ Twitch / X / YouTube
+- 12 个应用独立分流：AI / Apple / GitHub / Google / Microsoft / Spotify / Telegram / TikTok / TV（Netflix·Disney+·HBO·Prime Video·Apple TV+）/ Twitch / X / YouTube
 - 私有网络直连 → 国内域名/IP 直连 → 其余走主代理
 
 **🎯 策略组**
