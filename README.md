@@ -14,7 +14,7 @@ https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js
 
 **🔀 分流**
 - 广告拦截（REJECT，不产生任何流量）
-- 11 个应用独立分流：AI / Apple / GitHub / Google / Microsoft / Telegram / TikTok / TV（Netflix·Disney+·HBO·Prime Video·Apple TV+）/ Twitch / X / YouTube
+- 11 个应用独立分流：AI / Apple / GitHub / Google / Microsoft / Spotify / Telegram / TikTok / TV（Netflix·Disney+·HBO·Prime Video·Apple TV+）/ Twitch / X / YouTube
 - 私有网络直连 → 国内域名/IP 直连 → 其余走主代理
 
 **🎯 策略组**
@@ -37,7 +37,6 @@ https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js
 
 **🔧 节点增强（全自动，无需手动配置）**
 - vless / vmess / trojan 自动补全 uTLS chrome 指纹
-- REALITY 节点自动启用抗量子密钥交换（X25519MLKEM768）
 - 统一 IPv4 优先连接
 - 机场订阅节点经 override 同步生效以上全部增强
 
