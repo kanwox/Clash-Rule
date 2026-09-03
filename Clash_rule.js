@@ -1,4 +1,4 @@
-// Clash_rule.js v5.2
+// Clash_rule.js v5.3
 // 注意：需较新的 mihomo 内核；首次启动需联网下载规则集，请在日志中确认全部下载成功。
 
 function main(params) {
@@ -57,212 +57,6 @@ function main(params) {
             "+.chatgpt.com"
         ]
     };
-
-    const subDNS = params.dns || {};
-
-    // ── 订阅 DNS 悬空引用清洗 ──
-    // 本脚本会整体重建 rule-providers 与全部策略组，订阅自带配置里指向它们的
-    // rule-set:/geosite: 引用和 "#某组名" 后缀若原样并入，内核会因找不到目标而报错。
-    // geosite: 引用还会触发内核额外下载 geo 文件，与本脚本无 geo 数据的设计冲突。
-    // （脚本自己的 rule-set 引用在下方独立写入，不受此清洗影响）
-    // 本脚本固定生成的组名（App 组名需与下方 apps 数组保持同步）
-    const OWN_GROUPS = ["主代理", "静态", "直连", "AI", "Apple", "GitHub", "Google", "Microsoft",
-                        "Telegram", "TikTok", "TV", "Twitch", "X", "YouTube"];
-    // 内建策略 + 地区组名（23 个两位大写地区码，需与下方 regions 数组保持同步）
-    const BUILTIN_POLICIES = new Set(["DIRECT", "REJECT", "REJECT-DROP", "PASS", "GLOBAL"]);
-    const REGION_CODES = new Set(["AE", "AR", "AU", "BD", "BR", "CA", "DE", "FR", "GB", "HK", "ID",
-                                  "IN", "JP", "KR", "MY", "NL", "PH", "SG", "TH", "TR", "TW", "US", "VN"]);
-    // 校验 DNS 条目尾部 "#目标" 后缀：合法则整条保留，
-    // 无效（指向已被删除的组）则剥掉、该条 DNS 回落直连（安全默认）
-    const refValid = ref => BUILTIN_POLICIES.has(ref)
-        || OWN_GROUPS.indexOf(ref) !== -1
-        || REGION_CODES.has(ref);
-    const stripDanglingRef = entry => {
-        const s = String(entry);
-        const hash = s.indexOf("#");
-        if (hash === -1) return s;
-        return refValid(s.slice(hash + 1).split("&")[0].trim()) ? s : s.slice(0, hash);
-    };
-
-    const subPSN = [].concat(subDNS["proxy-server-nameserver"] || []).map(stripDanglingRef);
-    const subNS = [].concat(subDNS["nameserver"] || []).map(stripDanglingRef);
-    const subPolicy = Object.assign({}, subDNS["nameserver-policy"] || {});
-    const subFilter = [].concat(subDNS["fake-ip-filter"] || []).filter(item =>
-        !/^(rule-set|geosite):/i.test(String(item))
-    );
-
-    for (const k of Object.keys(subPolicy)) {
-        if (k === "+." || k === "*" || k === "+") { delete subPolicy[k]; continue; }    // 通吃键架空分流，丢弃
-        if (/^(rule-set|geosite):/i.test(k)) { delete subPolicy[k]; continue; }         // 指向已重建的规则集，丢弃
-        subPolicy[k] = [].concat(subPolicy[k]).map(stripDanglingRef);                   // 值里的 "#组名" 悬空引用同样清洗
-    }
-
-    params["dns"] = {
-        "enable": true,
-        "listen": "127.0.0.1:1053",
-        "ipv6": false, // 关闭 DNS 层 IPv6（与顶层 ipv6 无关），避免下发 fake-ip6 被 Chrome 误判成局域网地址而拦截
-        "prefer-h3": true,
-        "enhanced-mode": "fake-ip",
-        "fake-ip-range": "198.18.0.1/16",
-        // IPv6 fake-ip 段：官方示例的文档专用段；勿改用 fc00::/7 等内网保留地址，避免与真实局域网冲突
-        "fake-ip-range6": "fdfe:dcba:9876::/64",
-        "cache-algorithm": "arc",
-        // 保留订阅自带的 hosts 能力
-        "use-hosts": subDNS["use-hosts"] !== undefined ? subDNS["use-hosts"] : true,
-        "use-system-hosts": subDNS["use-system-hosts"] !== undefined ? subDNS["use-system-hosts"] : true,
-        ...(subDNS.hosts ? { "hosts": subDNS.hosts } : {}),
-        "fake-ip-filter": [
-            ...new Set([
-                "+.lan",
-                "+.local",
-                "localhost.ptlogin2.qq.com",
-                "+.msftconnecttest.com",
-                "+.msftncsi.com",
-                "+.ntp.org",
-                "+.xboxlive.com",
-                "+.playstation.net",
-                "+.xbox.com",
-                "xbox.ipv6.microsoft.com",
-                "+.srv.nintendo.net",
-                // 系统对时域名，拿假地址会导致对时失败进而影响 TLS 校验
-                "time.windows.com",
-                "time.apple.com",
-                // STUN 通配兜底：域名中含 stun 段的全部豁免假地址
-                "+.stun.*",
-                "+.stun.*.*",
-                "+.stun.*.*.*",
-                "+.stun.*.*.*.*",
-                "rule-set:cn-domain",
-                "rule-set:private-domain",
-                // 社区维护的 fake-ip 豁免清单兜底（连通性检测/NTP/STUN/游戏主机等），防手维护清单漏项
-                "rule-set:fakeip-filter",
-                ...subFilter
-            ])
-        ],
-        // 引导 DNS：仅用于解析其它 DoH 服务器的域名，明文 IP 最快且不依赖证书校验
-        // （DoT 在设备时钟不准时会因证书校验失败而失效）
-        "default-nameserver": [
-            "223.5.5.5",
-            "119.29.29.29"
-        ],
-        // 机场优先、独占不混用：机场指定了节点解析 DNS 就只用机场的，
-        // 避免公共 DNS 并发抢答把专线隐蔽域名解析成错误的落地 IP；机场没指定才用国内 DoH 兜底
-        "proxy-server-nameserver": subPSN.length > 0
-            ? [...new Set(subPSN)]
-            : [
-                "https://223.5.5.5/dns-query",
-                "https://doh.pub/dns-query"
-            ],
-        // 主解析同理：机场指定了 DNS 就独占使用；否则用规则默认（走主代理隧道查询）兜底
-        "nameserver": subNS.length > 0
-            ? [...new Set(subNS)]
-            : [
-                "https://1.1.1.1/dns-query#主代理",
-                "https://8.8.8.8/dns-query#主代理"
-            ],
-        "nameserver-policy": Object.assign({}, subPolicy, {
-            "rule-set:private-domain": [
-                "system://"
-            ],
-            "rule-set:ads-domain": [
-                "rcode://name_error"
-            ],
-            "rule-set:cn-domain": [
-                "https://223.5.5.5/dns-query",
-                "https://doh.pub/dns-query"
-            ]
-        })
-    };
-
-    // 远程规则集：MetaCubeX 官方拆分库，全 mrs，默认更新周期一个月（2592000 秒）
-    const RS_BASE = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
-    const domainProvider = (name, interval = 2592000) => ({
-        "type": "http",
-        "behavior": "domain",
-        "format": "mrs",
-        "url": `${RS_BASE}/geosite/${name}.mrs`,
-        "path": `./ruleset/geosite-${name}.mrs`,
-        "interval": interval
-    });
-    const ipProvider = name => ({
-        "type": "http",
-        "behavior": "ipcidr",
-        "format": "mrs",
-        "url": `${RS_BASE}/geoip/${name}.mrs`,
-        "path": `./ruleset/geoip-${name}.mrs`,
-        "interval": 2592000
-    });
-    // 引用名 → 官方分类名
-    const DOMAIN_SETS = {
-        "private-domain": "private",
-        "ads-domain": "category-ads-all",
-        "youtube-domain": "youtube",
-        "twitch-domain": "twitch",
-        "twitter-domain": "twitter",
-        "tiktok-domain": "tiktok",
-        "telegram-domain": "telegram",
-        "github-domain": "github",
-        "ai-domain": "category-ai-!cn",
-        "netflix-domain": "netflix",
-        "disney-domain": "disney",
-        "primevideo-domain": "primevideo",
-        "appletv-domain": "apple-tvplus",
-        "hbo-domain": "hbo",
-        "google-domain": "google",
-        "apple-domain": "apple",
-        "microsoft-domain": "microsoft",
-        "cn-domain": "cn"
-    };
-    const IP_SETS = {
-        "private-ip": "private",
-        "telegram-ip": "telegram",
-        "cn-ip": "cn"
-    };
-    params["rule-providers"] = {};
-    Object.keys(DOMAIN_SETS).forEach(key => {
-        // 广告域名时效性最强，单独周更（7 天）；其余分类变化慢，维持月更
-        params["rule-providers"][key] = key === "ads-domain"
-            ? domainProvider(DOMAIN_SETS[key], 604800)
-            : domainProvider(DOMAIN_SETS[key]);
-    });
-    Object.keys(IP_SETS).forEach(key => {
-        params["rule-providers"][key] = ipProvider(IP_SETS[key]);
-    });
-    // 社区维护的 fake-ip 豁免清单（wwqgtxx/clash-rules，独立来源），
-    // 供上方 dns.fake-ip-filter 以 rule-set:fakeip-filter 引用
-    params["rule-providers"]["fakeip-filter"] = {
-        "type": "http",
-        "behavior": "domain",
-        "format": "mrs",
-        "url": "https://testingcf.jsdelivr.net/gh/wwqgtxx/clash-rules@release/fakeip-filter.mrs",
-        "path": "./ruleset/fakeip-filter.mrs",
-        "interval": 2592000
-    };
-
-    const FP_OK = ["vless", "vmess", "trojan"];
-    (params.proxies || []).forEach(proxy => {
-        if (!proxy) return;
-        if (proxy.type !== "direct" && !("ip-version" in proxy)) proxy["ip-version"] = "ipv4-prefer";
-        if (FP_OK.indexOf(proxy.type) !== -1 && !proxy["client-fingerprint"]) {
-            const usesTLS = proxy.type === "trojan" || proxy.tls === true || proxy["reality-opts"];
-            if (usesTLS) proxy["client-fingerprint"] = "chrome";
-        }
-        if (proxy["reality-opts"] && !("support-x25519mlkem768" in proxy["reality-opts"])) {
-            proxy["reality-opts"]["support-x25519mlkem768"] = true;
-        }});
-
-    Object.values(params["proxy-providers"] || {}).forEach(provider => {
-        if (provider && typeof provider === "object") {
-            provider.override = Object.assign({}, provider.override || {}, {
-                "ip-version": "ipv4-prefer",
-                "override-expr": [
-                    ...(((provider.override || {})["override-expr"]) || []),
-                    '(select(.type == "trojan" or ((.type == "vless" or .type == "vmess") and (.tls == true or has("reality-opts")))) | select(has("client-fingerprint") | not) | .client-fingerprint) = "chrome"',
-                    '(select(has("reality-opts")) | select(.reality-opts | has("support-x25519mlkem768") | not) | .reality-opts.support-x25519mlkem768) = true'
-                ]
-            });
-        }
-    });
 
     const excludeFilter = '(?i)(剩余|官网|套餐|流量|到期|过期|更新|刷新|订阅|群|网址|客服|欢迎|加入|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\\d+(\\.\\d+)?\\s*(GB|TB)|\\d+\\s*Days?)([^A-Za-z0-9]|$))';
 
@@ -405,6 +199,222 @@ function main(params) {
     const activeRegions = subHasProviders ? regions : matchedRegions;
     const hasActiveRegions = activeRegions.length > 0;
 
+    const subDNS = params.dns || {};
+
+    // ── 订阅 DNS 悬空引用清洗 ──
+    // 本脚本会整体重建 rule-providers 与全部策略组，订阅自带配置里指向它们的
+    // rule-set:/geosite: 引用和 "#某组名" 后缀若原样并入，内核会因找不到目标而报错。
+    // geosite: 引用还会触发内核额外下载 geo 文件，与本脚本无 geo 数据的设计冲突。
+    // （脚本自己的 rule-set 引用在下方独立写入，不受此清洗影响）
+    // 本脚本固定生成的组名（App 组名需与下方 apps 数组保持同步）
+    const OWN_GROUPS = ["主代理", "静态", "直连", "AI", "Apple", "GitHub", "Google", "Microsoft",
+                        "Spotify", "Telegram", "TikTok", "TV", "Twitch", "X", "YouTube"];
+    // 内建策略
+    const BUILTIN_POLICIES = new Set(["DIRECT", "REJECT", "REJECT-DROP", "PASS", "GLOBAL"]);
+    // 地区组名：不用写死的全量地区码表，改为从上面已经算好的 activeRegions（实际会建组的地区）
+    // 动态生成，避免"引用了一个因节点不足而未实际建组的地区"导致内核找不到目标策略组而崩溃
+    const REGION_NAMES = new Set(activeRegions.map(region => region.name));
+    // 校验 DNS 条目尾部 "#目标" 后缀：合法则整条保留，
+    // 无效（指向已被删除的组）则剥掉、该条 DNS 回落直连（安全默认）
+    const refValid = ref => BUILTIN_POLICIES.has(ref)
+        || OWN_GROUPS.indexOf(ref) !== -1
+        || REGION_NAMES.has(ref);
+    const stripDanglingRef = entry => {
+        const s = String(entry);
+        const hash = s.indexOf("#");
+        if (hash === -1) return s;
+        return refValid(s.slice(hash + 1).split("&")[0].trim()) ? s : s.slice(0, hash);
+    };
+
+    const subPSN = [].concat(subDNS["proxy-server-nameserver"] || []).map(stripDanglingRef);
+    const subNS = [].concat(subDNS["nameserver"] || []).map(stripDanglingRef);
+    const subPolicy = Object.assign({}, subDNS["nameserver-policy"] || {});
+    const subFilter = [].concat(subDNS["fake-ip-filter"] || []).filter(item =>
+        !/^(rule-set|geosite):/i.test(String(item))
+    );
+
+    for (const k of Object.keys(subPolicy)) {
+        if (k === "+." || k === "*" || k === "+") { delete subPolicy[k]; continue; }    // 通吃键架空分流，丢弃
+        if (/^(rule-set|geosite):/i.test(k)) { delete subPolicy[k]; continue; }         // 指向已重建的规则集，丢弃
+        subPolicy[k] = [].concat(subPolicy[k]).map(stripDanglingRef);                   // 值里的 "#组名" 悬空引用同样清洗
+    }
+
+    params["dns"] = {
+        "enable": true,
+        "listen": "127.0.0.1:1053",
+        "ipv6": false, // 关闭 DNS 层 IPv6（与顶层 ipv6 无关），避免下发 fake-ip6 被 Chrome 误判成局域网地址而拦截
+        "prefer-h3": true,
+        "enhanced-mode": "fake-ip",
+        "fake-ip-range": "198.18.0.1/16",
+        // IPv6 fake-ip 段：官方示例的文档专用段；勿改用 fc00::/7 等内网保留地址，避免与真实局域网冲突
+        "fake-ip-range6": "fdfe:dcba:9876::/64",
+        "cache-algorithm": "arc",
+        // 保留订阅自带的 hosts 能力
+        "use-hosts": subDNS["use-hosts"] !== undefined ? subDNS["use-hosts"] : true,
+        "use-system-hosts": subDNS["use-system-hosts"] !== undefined ? subDNS["use-system-hosts"] : true,
+        ...(subDNS.hosts ? { "hosts": subDNS.hosts } : {}),
+        "fake-ip-filter": [
+            ...new Set([
+                "+.lan",
+                "+.local",
+                "localhost.ptlogin2.qq.com",
+                "+.msftconnecttest.com",
+                "+.msftncsi.com",
+                "+.ntp.org",
+                "+.xboxlive.com",
+                "+.playstation.net",
+                "+.xbox.com",
+                "xbox.ipv6.microsoft.com",
+                "+.srv.nintendo.net",
+                // 系统对时域名，拿假地址会导致对时失败进而影响 TLS 校验
+                "time.windows.com",
+                "time.apple.com",
+                // STUN 通配兜底：域名中含 stun 段的全部豁免假地址
+                "+.stun.*",
+                "+.stun.*.*",
+                "+.stun.*.*.*",
+                "+.stun.*.*.*.*",
+                "rule-set:cn-domain",
+                "rule-set:private-domain",
+                // 社区维护的 fake-ip 豁免清单兜底（连通性检测/NTP/STUN/游戏主机等），防手维护清单漏项
+                "rule-set:fakeip-filter",
+                ...subFilter
+            ])
+        ],
+        // 引导 DNS：仅用于解析其它 DoH 服务器的域名，明文 IP 最快且不依赖证书校验
+        // （DoT 在设备时钟不准时会因证书校验失败而失效）
+        "default-nameserver": [
+            "223.5.5.5",
+            "119.29.29.29"
+        ],
+        // 机场优先、独占不混用：机场指定了节点解析 DNS 就只用机场的，
+        // 避免公共 DNS 并发抢答把专线隐蔽域名解析成错误的落地 IP；机场没指定才用国内 DoH 兜底
+        "proxy-server-nameserver": subPSN.length > 0
+            ? [...new Set(subPSN)]
+            : [
+                "https://223.5.5.5/dns-query",
+                "https://doh.pub/dns-query"
+            ],
+        // 主解析同理：机场指定了 DNS 就独占使用；否则用规则默认（走主代理隧道查询）兜底
+        "nameserver": subNS.length > 0
+            ? [...new Set(subNS)]
+            : [
+                "https://1.1.1.1/dns-query#主代理",
+                "https://8.8.8.8/dns-query#主代理"
+            ],
+        // 规则命中 DIRECT 但未被下方 nameserver-policy 单独覆盖的域名（例如未收录进
+        // cn-domain 分类的冷门国内站点，配合下方 cn-ip 规则去掉 no-resolve 后需要真实解析）
+        // 用国内 DNS 解析，避免退回 nameserver 走主代理查询海外 DNS，导致解析慢、拿错境外 CDN IP
+        // 用纯 IP 而非 DoH：该字段用 DoH 时有部分环境会反复回退到 default-nameserver 重复解析、拖高延迟
+        "direct-nameserver": [
+            "223.5.5.5",
+            "119.29.29.29"
+        ],
+        // 仅当 direct-nameserver 未覆盖时才回退到 nameserver-policy，
+        // 保证 private-domain/ads-domain/cn-domain 现有的针对性覆盖仍优先生效
+        "direct-nameserver-follow-policy": true,
+        "nameserver-policy": Object.assign({}, subPolicy, {
+            "rule-set:private-domain": [
+                "system://"
+            ],
+            "rule-set:ads-domain": [
+                "rcode://name_error"
+            ],
+            "rule-set:cn-domain": [
+                "https://223.5.5.5/dns-query",
+                "https://doh.pub/dns-query"
+            ]
+        })
+    };
+
+    // 远程规则集：MetaCubeX 官方拆分库，全 mrs，默认更新周期一个月（2592000 秒）
+    const RS_BASE = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
+    const domainProvider = (name, interval = 2592000) => ({
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": `${RS_BASE}/geosite/${name}.mrs`,
+        "path": `./ruleset/geosite-${name}.mrs`,
+        "interval": interval
+    });
+    const ipProvider = name => ({
+        "type": "http",
+        "behavior": "ipcidr",
+        "format": "mrs",
+        "url": `${RS_BASE}/geoip/${name}.mrs`,
+        "path": `./ruleset/geoip-${name}.mrs`,
+        "interval": 2592000
+    });
+    // 引用名 → 官方分类名
+    const DOMAIN_SETS = {
+        "private-domain": "private",
+        "ads-domain": "category-ads-all",
+        "youtube-domain": "youtube",
+        "twitch-domain": "twitch",
+        "twitter-domain": "twitter",
+        "tiktok-domain": "tiktok",
+        "telegram-domain": "telegram",
+        "github-domain": "github",
+        "ai-domain": "category-ai-!cn",
+        "netflix-domain": "netflix",
+        "disney-domain": "disney",
+        "primevideo-domain": "primevideo",
+        "appletv-domain": "apple-tvplus",
+        "hbo-domain": "hbo",
+        "spotify-domain": "spotify",
+        "google-domain": "google",
+        "apple-domain": "apple",
+        "microsoft-domain": "microsoft",
+        "cn-domain": "cn"
+    };
+    const IP_SETS = {
+        "private-ip": "private",
+        "telegram-ip": "telegram",
+        "cn-ip": "cn"
+    };
+    params["rule-providers"] = {};
+    Object.keys(DOMAIN_SETS).forEach(key => {
+        // 广告域名时效性最强，单独周更（7 天）；其余分类变化慢，维持月更
+        params["rule-providers"][key] = key === "ads-domain"
+            ? domainProvider(DOMAIN_SETS[key], 604800)
+            : domainProvider(DOMAIN_SETS[key]);
+    });
+    Object.keys(IP_SETS).forEach(key => {
+        params["rule-providers"][key] = ipProvider(IP_SETS[key]);
+    });
+    // 社区维护的 fake-ip 豁免清单（wwqgtxx/clash-rules，独立来源），
+    // 供上方 dns.fake-ip-filter 以 rule-set:fakeip-filter 引用
+    params["rule-providers"]["fakeip-filter"] = {
+        "type": "http",
+        "behavior": "domain",
+        "format": "mrs",
+        "url": "https://testingcf.jsdelivr.net/gh/wwqgtxx/clash-rules@release/fakeip-filter.mrs",
+        "path": "./ruleset/fakeip-filter.mrs",
+        "interval": 2592000
+    };
+
+    const FP_OK = ["vless", "vmess", "trojan"];
+    (params.proxies || []).forEach(proxy => {
+        if (!proxy) return;
+        if (proxy.type !== "direct" && !("ip-version" in proxy)) proxy["ip-version"] = "ipv4-prefer";
+        if (FP_OK.indexOf(proxy.type) !== -1 && !proxy["client-fingerprint"]) {
+            const usesTLS = proxy.type === "trojan" || proxy.tls === true || proxy["reality-opts"];
+            if (usesTLS) proxy["client-fingerprint"] = "chrome";
+        }
+    });
+
+    Object.values(params["proxy-providers"] || {}).forEach(provider => {
+        if (provider && typeof provider === "object") {
+            provider.override = Object.assign({}, provider.override || {}, {
+                "ip-version": "ipv4-prefer",
+                "override-expr": [
+                    ...(((provider.override || {})["override-expr"]) || []),
+                    '(select(.type == "trojan" or ((.type == "vless" or .type == "vmess") and (.tls == true or has("reality-opts")))) | select(has("client-fingerprint") | not) | .client-fingerprint) = "chrome"'
+                ]
+            });
+        }
+    });
+
     let groups = [];
 
     //主代理
@@ -451,6 +461,7 @@ function main(params) {
         { name: "GitHub",    icon: "https://i.postimg.cc/vTSTYrLQ/github.png" },
         { name: "Google",    icon: "google.png" },
         { name: "Microsoft", icon: "microsoft.png" },
+        { name: "Spotify",   icon: "spotify.png" },
         { name: "Telegram",  icon: "telegram.png" },
         { name: "TikTok",    icon: "tiktok.png" },
         { name: "TV",        icon: "netflix.png" },
@@ -503,6 +514,9 @@ function main(params) {
         "RULE-SET,private-domain,DIRECT",
         "RULE-SET,private-ip,DIRECT,no-resolve",
         "RULE-SET,ads-domain,REJECT",
+        // 系统对时属于基础功能，优先于业务分流；很多代理节点会丢弃/限制 UDP 123，
+        // 时间偏差过大会连带导致全局 HTTPS/TLS 证书校验失败
+        "AND,((DST-PORT,123),(NETWORK,udp)),DIRECT",
 
         "RULE-SET,youtube-domain,YouTube",
         "RULE-SET,twitch-domain,Twitch",
@@ -518,13 +532,16 @@ function main(params) {
         "RULE-SET,primevideo-domain,TV",
         "RULE-SET,appletv-domain,TV",
         "RULE-SET,hbo-domain,TV",
+        "RULE-SET,spotify-domain,Spotify",
 
         "RULE-SET,google-domain,Google",
         "RULE-SET,apple-domain,Apple",
         "RULE-SET,microsoft-domain,Microsoft",
 
         "RULE-SET,cn-domain,DIRECT",
-        "RULE-SET,cn-ip,DIRECT,no-resolve",
+        // 去掉 no-resolve：配合上方 dns.direct-nameserver，让未被 cn-domain 收录的冷门
+        // 国内站点也能在命中该规则前完成真实 IP 解析、判断是否落在境内网段
+        "RULE-SET,cn-ip,DIRECT",
 
         "MATCH,主代理"
     ];
