@@ -1,6 +1,23 @@
 // Clash_rule.js v5.3
 // 注意：需较新的 mihomo 内核；首次启动需联网下载规则集，请在日志中确认全部下载成功。
 
+// ── 可调参数（集中维护） ──
+const REGION_MIN_NODES = 2;      // 同地区节点数达到该值才动态建组
+const RS_INTERVAL = 2592000;     // 规则集默认更新周期：一个月
+const ADS_INTERVAL = 604800;     // 广告域名规则集更新周期：一周（时效性最强）
+const CN_DNS_DOH = ["https://223.5.5.5/dns-query", "https://doh.pub/dns-query"];
+const CN_DNS_PLAIN = ["223.5.5.5", "119.29.29.29"];
+const TEST_URL_DIRECT = "http://connect.rom.miui.com/generate_204";
+const TEST_URL_PROXY = "https://www.gstatic.com/generate_204";
+
+// 客户端脚本引擎注入的 console 方法集不统一（部分引擎仅提供 log）；
+// 统一经此输出警告：warn 缺失时降级 log，均缺失时静默，避免 TypeError 中断整次转换
+const warnLog = (...args) => {
+    if (typeof console === "undefined") return;
+    if (typeof console.warn === "function") console.warn(...args);
+    else if (typeof console.log === "function") console.log(...args);
+};
+
 function main(params) {
     if (!params || typeof params !== "object") params = {};
     if (!Array.isArray(params.proxies)) params.proxies = [];
@@ -180,34 +197,48 @@ function main(params) {
     const allProxies = (params.proxies || []).filter(proxy => proxy && proxy.type !== "direct");
     const excludeRe = toJsRegex(excludeFilter);
 
-    const threshold = 2;
     const matchedRegions = regions.filter(region => {
         const regex = toJsRegex(region.regex);
         let count = 0;
         for (const proxy of allProxies) {
             if (proxy && proxy.name && regex.test(proxy.name) && !excludeRe.test(proxy.name)) {
                 count++;
-                if (count >= threshold) return true;
+                if (count >= REGION_MIN_NODES) return true;
             }
         }
         return false;
     });
 
     // 订阅使用代理集合时无法在脚本期得知节点内容，维持全量地区组；
-    // 普通节点列表则按“同地区 ≥2 个节点”动态建组
+    // 普通节点列表则按“同地区节点数达到 REGION_MIN_NODES”动态建组
     const activeRegions = subHasProviders ? regions : matchedRegions;
     const hasActiveRegions = activeRegions.length > 0;
 
     const subDNS = params.dns || {};
+
+    // App 策略组名单与图标（供下方 OWN_GROUPS 派生与末尾组生成共用，单一来源）
+    const apps = [
+        { name: "AI",        icon: "openai.png" },
+        { name: "Apple",     icon: "apple.png" },
+        { name: "GitHub",    icon: "https://i.postimg.cc/vTSTYrLQ/github.png" },
+        { name: "Google",    icon: "google.png" },
+        { name: "Microsoft", icon: "microsoft.png" },
+        { name: "Spotify",   icon: "spotify.png" },
+        { name: "Telegram",  icon: "telegram.png" },
+        { name: "TikTok",    icon: "tiktok.png" },
+        { name: "TV",        icon: "netflix.png" },
+        { name: "Twitch",    icon: "twitch.png" },
+        { name: "X",         icon: "x.png" },
+        { name: "YouTube",   icon: "youtube.png" }
+    ];
 
     // ── 订阅 DNS 悬空引用清洗 ──
     // 本脚本会整体重建 rule-providers 与全部策略组，订阅自带配置里指向它们的
     // rule-set:/geosite:/geoip: 引用和 "#某组名" 后缀若原样并入，内核会因找不到目标而报错。
     // geosite:/geoip: 引用还会触发内核额外下载 geo 文件，与本脚本无 geo 数据的设计冲突。
     // （脚本自己的 rule-set 引用在下方独立写入，不受此清洗影响）
-    // 本脚本固定生成的组名（App 组名需与下方 apps 数组保持同步）
-    const OWN_GROUPS = ["主代理", "静态", "直连", "AI", "Apple", "GitHub", "Google", "Microsoft",
-                        "Spotify", "Telegram", "TikTok", "TV", "Twitch", "X", "YouTube"];
+    // 本脚本固定生成的组名（App 组名自动从上方 apps 数组派生，单一来源，无需手工同步）
+    const OWN_GROUPS = ["主代理", "静态", "直连", ...apps.map(app => app.name)];
     // 内建策略
     const BUILTIN_POLICIES = new Set(["DIRECT", "REJECT", "REJECT-DROP", "PASS", "GLOBAL"]);
     // 地区组名：不用写死的全量地区码表，改为从上面已经算好的 activeRegions（实际会建组的地区）
@@ -226,7 +257,14 @@ function main(params) {
         const s = String(entry);
         const hash = s.indexOf("#");
         if (hash === -1) return s;
-        return refValid(s.slice(hash + 1).split("&")[0].trim()) ? s : s.slice(0, hash);
+        // 内核解析 fragment 的规则（config.parseNameServer）：按 "&" 分段，含 "=" 的段是
+        // 参数（h3/ecs 等），不含 "=" 的段是节点/组名、最后一段生效。因此只校验生效的
+        // 裸段；纯参数 fragment 不含组引用，整条保留。
+        const bare = s.slice(hash + 1).split("&")
+            .map(seg => seg.trim())
+            .filter(seg => seg !== "" && !seg.includes("="));
+        if (bare.length === 0) return s;
+        return refValid(bare[bare.length - 1]) ? s : s.slice(0, hash);
     };
 
     const subPSN = [].concat(subDNS["proxy-server-nameserver"] || []).map(stripDanglingRef);
@@ -293,10 +331,13 @@ function main(params) {
         proxyServerNameserver = [...new Set(subPSN)];
         proxyServerNameserverPolicy = subPSNPolicy;
     } else {
+        // 节点 policy 按未设置处理：为它收集的旧 rule-set 依赖一并放弃，
+        // 否则并入的 provider 无人引用，只会凭空多下载规则集
+        for (const k of Object.keys(carriedRuleProviders)) delete carriedRuleProviders[k];
         if (Object.keys(subPSNPolicy).length > 0) {
             // 配置了节点 policy 却没有节点 nameserver：原配置里这个 policy 可能本就未生效，
             // 不能无提示激活——按未显式设置处理，走下面的迁移/兜底逻辑
-            console.warn(
+            warnLog(
                 "[Clash_rule.js] 订阅设置了 dns.proxy-server-nameserver-policy 但 " +
                 "dns.proxy-server-nameserver 为空：该 policy 在原配置里可能并未生效，" +
                 "本次不代入运行，proxy-server-nameserver-policy 按未设置处理。"
@@ -318,19 +359,13 @@ function main(params) {
             // 普通域名解析策略/服务器按原优先关系迁入节点解析（policy 优先于 nameserver 的相对关系不变）
             proxyServerNameserver = subNS.length > 0
                 ? [...new Set(subNS)]
-                : [
-                    "https://223.5.5.5/dns-query",
-                    "https://doh.pub/dns-query"
-                ];
+                : [...CN_DNS_DOH];
             proxyServerNameserverPolicy = Object.keys(subPolicy).length > 0
                 ? Object.assign({}, subPolicy)
                 : undefined;
         } else {
             // 原配置没有任何可继承的解析信息，才使用脚本默认公共 DNS
-            proxyServerNameserver = [
-                "https://223.5.5.5/dns-query",
-                "https://doh.pub/dns-query"
-            ];
+            proxyServerNameserver = [...CN_DNS_DOH];
             proxyServerNameserverPolicy = undefined;
         }
     }
@@ -381,10 +416,7 @@ function main(params) {
         ],
         // 引导 DNS：仅用于解析其它 DoH 服务器的域名，明文 IP 最快且不依赖证书校验
         // （DoT 在设备时钟不准时会因证书校验失败而失效）
-        "default-nameserver": [
-            "223.5.5.5",
-            "119.29.29.29"
-        ],
+        "default-nameserver": [...CN_DNS_PLAIN],
         // 机场优先、独占不混用：机场指定了节点解析 DNS 就只用机场的；
         // 没指定则走上方的迁移/兜底逻辑（见 proxyServerNameserver 计算）
         "proxy-server-nameserver": proxyServerNameserver,
@@ -401,10 +433,7 @@ function main(params) {
         // 规则命中 DIRECT 但未被下方 nameserver-policy 单独覆盖的域名（例如未收录进
         // cn-domain 分类的冷门国内站点）用国内 DNS 解析，避免退回 nameserver 走主代理查询海外 DNS
         // 用纯 IP 而非 DoH：该字段用 DoH 时有部分环境会反复回退到 default-nameserver 重复解析、拖高延迟
-        "direct-nameserver": [
-            "223.5.5.5",
-            "119.29.29.29"
-        ],
+        "direct-nameserver": [...CN_DNS_PLAIN],
         // 仅当 direct-nameserver 未覆盖时才回退到 nameserver-policy，
         // 保证 private-domain/ads-domain/cn-domain 现有的针对性覆盖仍优先生效
         "direct-nameserver-follow-policy": true,
@@ -415,16 +444,13 @@ function main(params) {
             "rule-set:ads-domain": [
                 "rcode://name_error"
             ],
-            "rule-set:cn-domain": [
-                "https://223.5.5.5/dns-query",
-                "https://doh.pub/dns-query"
-            ]
+            "rule-set:cn-domain": [...CN_DNS_DOH]
         })
     };
 
     // 远程规则集：MetaCubeX 官方拆分库，全 mrs，默认更新周期一个月（2592000 秒）
     const RS_BASE = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
-    const domainProvider = (name, interval = 2592000) => ({
+    const domainProvider = (name, interval = RS_INTERVAL) => ({
         "type": "http",
         "behavior": "domain",
         "format": "mrs",
@@ -438,7 +464,7 @@ function main(params) {
         "format": "mrs",
         "url": `${RS_BASE}/geoip/${name}.mrs`,
         "path": `./ruleset/geoip-${name}.mrs`,
-        "interval": 2592000
+        "interval": RS_INTERVAL
     });
     // 引用名 → 官方分类名
     const DOMAIN_SETS = {
@@ -471,7 +497,7 @@ function main(params) {
     Object.keys(DOMAIN_SETS).forEach(key => {
         // 广告域名时效性最强，单独周更（7 天）；其余分类变化慢，维持月更
         params["rule-providers"][key] = key === "ads-domain"
-            ? domainProvider(DOMAIN_SETS[key], 604800)
+            ? domainProvider(DOMAIN_SETS[key], ADS_INTERVAL)
             : domainProvider(DOMAIN_SETS[key]);
     });
     Object.keys(IP_SETS).forEach(key => {
@@ -485,7 +511,7 @@ function main(params) {
         "format": "mrs",
         "url": "https://testingcf.jsdelivr.net/gh/wwqgtxx/clash-rules@release/fakeip-filter.mrs",
         "path": "./ruleset/fakeip-filter.mrs",
-        "interval": 2592000
+        "interval": RS_INTERVAL
     };
     // 并入 proxy-server-nameserver-policy 里确认必要的旧 rule-set 依赖
     // （carriedRuleProviders 在上方 dns 计算阶段已确认这些名字在订阅原始 rule-providers 中存在定义）
@@ -538,10 +564,11 @@ function main(params) {
             const existingExpr = normalizeOverrideExpr((provider.override || {})["override-expr"], name);
             // 保留原表达式顺序；只保证脚本自己的指纹表达式最多出现一次，不重排/不普遍去重上游表达式
             const finalExpr = existingExpr.includes(FP_EXPR) ? existingExpr : [...existingExpr, FP_EXPR];
-            provider.override = Object.assign({}, provider.override || {}, {
-                "ip-version": "ipv4-prefer",
-                "override-expr": finalExpr
-            });
+            // 与上方普通节点的处理对齐：机场已显式设置 ip-version 时不覆盖
+            const mergedOverride = Object.assign({}, provider.override || {});
+            if (!("ip-version" in mergedOverride)) mergedOverride["ip-version"] = "ipv4-prefer";
+            mergedOverride["override-expr"] = finalExpr;
+            provider.override = mergedOverride;
         }
     });
 
@@ -575,7 +602,7 @@ function main(params) {
         hidden: true,
         icon: "https://testingcf.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Direct.png",
         proxies: ["DIRECT"],
-        url: "http://connect.rom.miui.com/generate_204"
+        url: TEST_URL_DIRECT
     });
 
     // App策略组
@@ -583,21 +610,6 @@ function main(params) {
         "主代理",
         "直连",
         ...activeRegions.map(region => `${region.name}`)
-    ];
-
-    const apps = [
-        { name: "AI",        icon: "openai.png" },
-        { name: "Apple",     icon: "apple.png" },
-        { name: "GitHub",    icon: "https://i.postimg.cc/vTSTYrLQ/github.png" },
-        { name: "Google",    icon: "google.png" },
-        { name: "Microsoft", icon: "microsoft.png" },
-        { name: "Spotify",   icon: "spotify.png" },
-        { name: "Telegram",  icon: "telegram.png" },
-        { name: "TikTok",    icon: "tiktok.png" },
-        { name: "TV",        icon: "netflix.png" },
-        { name: "Twitch",    icon: "twitch.png" },
-        { name: "X",         icon: "x.png" },
-        { name: "YouTube",   icon: "youtube.png" }
     ];
 
     apps.forEach(app => {
@@ -628,7 +640,7 @@ function main(params) {
             "filter": region.regex,
             "exclude-filter": excludeFilter,
             "empty-fallback": "REJECT",
-            "url": "https://www.gstatic.com/generate_204",
+            "url": TEST_URL_PROXY,
             "interval": 300,
             "tolerance": 30,
             "lazy": true,
