@@ -2,9 +2,10 @@
 // 注意：需较新的 mihomo 内核；首次启动需联网下载规则集，请在日志中确认全部下载成功。
 
 // ── 可调参数（集中维护） ──
-const REGION_MIN_NODES = 2;      // 同地区节点数达到该值才动态建组
-const RS_INTERVAL = 2592000;     // 规则集默认更新周期：一个月
-const ADS_INTERVAL = 604800;     // 广告域名规则集更新周期：一周（时效性最强）
+const DEFAULT_IP_VERSION = "dual"; // 节点双栈偏好：dual (并发择优) / ipv6-prefer / ipv4-prefer
+const REGION_MIN_NODES = 2;        // 同地区节点数达到该值才动态建组
+const RS_INTERVAL = 2592000;       // 规则集默认更新周期：一个月
+const ADS_INTERVAL = 604800;       // 广告域名规则集更新周期：一周（时效性最强）
 const CN_DNS_DOH = ["https://223.5.5.5/dns-query", "https://doh.pub/dns-query"];
 const CN_DNS_PLAIN = ["223.5.5.5", "119.29.29.29"];
 const TEST_URL_DIRECT = "http://connect.rom.miui.com/generate_204";
@@ -36,8 +37,7 @@ function main(params) {
         "tcp-concurrent": true,
         "ipv6": true,
         "find-process-mode": "off",
-        // TCP 保活调优：内核默认间隔仅 15s，移动端费电且长连接易被 NAT 提前掐断；
-        // 300/30 为省电与响应速度的折中值
+        // TCP 保活参数（秒）：平衡移动端电量消耗与 NAT 会话活性，避免连接被中间网关静默重置
         "keep-alive-idle": 300,
         "keep-alive-interval": 30
     };
@@ -373,7 +373,7 @@ function main(params) {
     params["dns"] = {
         "enable": true,
         "listen": "127.0.0.1:1053",
-        "ipv6": false, // 关闭 DNS 层 IPv6（与顶层 ipv6 无关），避免下发 fake-ip6 被 Chrome 误判成局域网地址而拦截
+        "ipv6": subDNS["ipv6"] !== undefined ? subDNS["ipv6"] : true, // 允许解析 AAAA 记录，确保节点可获取 IPv6 地址
         "prefer-h3": true,
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
@@ -528,7 +528,7 @@ function main(params) {
     const FP_OK = ["vless", "vmess", "trojan"];
     (params.proxies || []).forEach(proxy => {
         if (!proxy) return;
-        if (proxy.type !== "direct" && !("ip-version" in proxy)) proxy["ip-version"] = "ipv4-prefer";
+        if (proxy.type !== "direct" && !("ip-version" in proxy)) proxy["ip-version"] = DEFAULT_IP_VERSION;
         if (FP_OK.indexOf(proxy.type) !== -1 && !proxy["client-fingerprint"]) {
             const usesTLS = proxy.type === "trojan" || proxy.tls === true || proxy["reality-opts"];
             if (usesTLS) proxy["client-fingerprint"] = "chrome";
@@ -564,9 +564,8 @@ function main(params) {
             const existingExpr = normalizeOverrideExpr((provider.override || {})["override-expr"], name);
             // 保留原表达式顺序；只保证脚本自己的指纹表达式最多出现一次，不重排/不普遍去重上游表达式
             const finalExpr = existingExpr.includes(FP_EXPR) ? existingExpr : [...existingExpr, FP_EXPR];
-            // 与上方普通节点的处理对齐：机场已显式设置 ip-version 时不覆盖
             const mergedOverride = Object.assign({}, provider.override || {});
-            if (!("ip-version" in mergedOverride)) mergedOverride["ip-version"] = "ipv4-prefer";
+            if (!("ip-version" in mergedOverride)) mergedOverride["ip-version"] = DEFAULT_IP_VERSION;
             mergedOverride["override-expr"] = finalExpr;
             provider.override = mergedOverride;
         }
