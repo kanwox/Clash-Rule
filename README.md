@@ -38,7 +38,7 @@ https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js
 
 **🔧 节点增强（全自动，无需手动配置）**
 - vless / vmess / trojan 自动补全 uTLS chrome 指纹
-- 统一 IPv4 优先连接
+- 统一双栈并发连接（IPv4/IPv6 同时测速择优)
 - 机场订阅节点经 override 同步生效以上全部增强
 
 ## 📦 使用
