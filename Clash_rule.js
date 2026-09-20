@@ -79,117 +79,117 @@ function main(params) {
         {
             name: "AE",
             regex: "(?i)(阿联酋|阿聯酋|迪拜|阿布扎比|🇦🇪|(^|[^A-Za-z])UAE([^A-Za-z]|$)|Emirates|Dubai)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/ae.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/ae.svg"
         },
         {
             name: "AR",
             regex: "(?i)(阿根廷|布宜诺斯艾利斯|🇦🇷|(^|[^A-Za-z])AR([^A-Za-z]|$)|(^|[^A-Za-z])ARG([^A-Za-z]|$)|Argentina)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/ar.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/ar.svg"
         },
         {
             name: "AU",
             regex: "(?i)(澳大利亚|澳大利亞|澳洲|悉尼|墨尔本|墨爾本|🇦🇺|(^|[^A-Za-z])AU([^A-Za-z]|$)|(^|[^A-Za-z])AUS([^A-Za-z]|$)|Australia|Sydney|Melbourne)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/au.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/au.svg"
         },
         {
             name: "BD",
             regex: "(?i)(孟加拉|孟加拉國|达卡|達卡|🇧🇩|(^|[^A-Za-z])BD([^A-Za-z]|$)|(^|[^A-Za-z])BGD([^A-Za-z]|$)|Bangladesh|Dhaka)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/bd.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/bd.svg"
         },
         {
             name: "BR",
             regex: "(?i)(巴西|圣保罗|聖保羅|🇧🇷|(^|[^A-Za-z])BR([^A-Za-z]|$)|(^|[^A-Za-z])BRA([^A-Za-z]|$)|Brazil|Brasil|SaoPaulo)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/br.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/br.svg"
         },
         {
             name: "CA",
             regex: "(?i)(加拿大|多伦多|多倫多|温哥华|溫哥華|🇨🇦|(^|[^A-Za-z])CA([^A-Za-z]|$)|(^|[^A-Za-z])CAN([^A-Za-z]|$)|Canada|Toronto|Vancouver)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/ca.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/ca.svg"
         },
         {
             name: "DE",
             regex: "(?i)(德国|德國|法兰克福|法蘭克福|🇩🇪|(^|[^A-Za-z])DE([^A-Za-z]|$)|(^|[^A-Za-z])DEU([^A-Za-z]|$)|Germany|Frankfurt)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/de.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/de.svg"
         },
         {
             name: "FR",
             regex: "(?i)(法国|法國|巴黎|🇫🇷|(^|[^A-Za-z])FR([^A-Za-z]|$)|(^|[^A-Za-z])FRA([^A-Za-z]|$)|France|Paris)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/fr.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/fr.svg"
         },
         {
             name: "GB",
             regex: "(?i)(英国|英國|伦敦|倫敦|🇬🇧|(^|[^A-Za-z])UK([^A-Za-z]|$)|(^|[^A-Za-z])GB([^A-Za-z]|$)|(^|[^A-Za-z])GBR([^A-Za-z]|$)|United[ -]?Kingdom|England|London)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/gb.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/gb.svg"
         },
         {
             name: "HK",
             regex: "(?i)(香港|🇭🇰|(^|[^A-Za-z])HK([^A-Za-z]|$)|(^|[^A-Za-z])HKG([^A-Za-z]|$)|Hong[ -]?Kong)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/hk.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/hk.svg"
         },
         {
             name: "ID",
             regex: "(?i)(印度尼西亚|印度尼西亞|印尼|雅加达|雅加達|🇮🇩|Indonesia|Jakarta|(?:^|[|/·?][ ]*)ID(?:[ ]*(?:[|/_·?-]|[0-9])|$)|(?:^|[^A-Za-z0-9])IDN(?:[^A-Za-z]|$))",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/id.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/id.svg"
         },
         {
             name: "IN",
             regex: "(?i)(印度([^尼]|$)|新德里|孟买|孟買|班加罗尔|班加羅爾|🇮🇳|(^|[^A-Za-z])India([^A-Za-z]|$)|Mumbai|Delhi|Bangalore|(^|[^A-Za-z])IN([^A-Za-z]|$)|(^|[^A-Za-z])IND([^A-Za-z]|$))",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/in.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/in.svg"
         },
         {
             name: "JP",
             regex: "(?i)(日本|东京|東京|大阪|🇯🇵|(^|[^A-Za-z])JP([^A-Za-z]|$)|(^|[^A-Za-z])JPN([^A-Za-z]|$)|Japan)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/jp.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/jp.svg"
         },
         {
             name: "KR",
             regex: "(?i)(韩国|韓国|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/kr.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/kr.svg"
         },
         {
             name: "MY",
             regex: "(?i)(马来西亚|馬來西亞|吉隆坡|🇲🇾|(^|[^A-Za-z])MY([^A-Za-z]|$)|(^|[^A-Za-z])MYS([^A-Za-z]|$)|Malaysia)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/my.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/my.svg"
         },
         {
             name: "NL",
             regex: "(?i)(荷兰|荷蘭|阿姆斯特丹|🇳🇱|(^|[^A-Za-z])NL([^A-Za-z]|$)|(^|[^A-Za-z])NLD([^A-Za-z]|$)|Netherlands|Amsterdam)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/nl.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/nl.svg"
         },
         {
             name: "PH",
             regex: "(?i)(菲律宾|菲律賓|马尼拉|馬尼拉|宿务|宿霧|🇵🇭|(^|[^A-Za-z])PH([^A-Za-z]|$)|(^|[^A-Za-z])PHL([^A-Za-z]|$)|Philippines|Manila|Cebu)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/ph.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/ph.svg"
         },
         {
             name: "SG",
             regex: "(?i)(新加坡|狮城|獅城|🇸🇬|(^|[^A-Za-z])SG([^A-Za-z]|$)|(^|[^A-Za-z])SGP([^A-Za-z]|$)|Singapore)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/sg.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/sg.svg"
         },
         {
             name: "TH",
             regex: "(?i)(泰国|泰國|曼谷|🇹🇭|Thailand|Bangkok|(^|[^A-Za-z])TH([^A-Za-z]|$)|(^|[^A-Za-z])THA([^A-Za-z]|$))",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/th.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/th.svg"
         },
         {
             name: "TR",
             regex: "(?i)(土耳其|伊斯坦布尔|🇹🇷|(^|[^A-Za-z])TR([^A-Za-z]|$)|(^|[^A-Za-z])TUR([^A-Za-z]|$)|Turkey|Türkiye|Istanbul)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/tr.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/tr.svg"
         },
         {
             name: "TW",
             regex: "(?i)(台湾|台灣|台北|新北|🇹🇼|(^|[^A-Za-z])TW([^A-Za-z]|$)|(^|[^A-Za-z])TWN([^A-Za-z]|$)|Taiwan)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/tw.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/tw.svg"
         },
         {
             name: "US",
             regex: "(?i)(美国|美國|洛杉矶|洛杉磯|圣何塞|聖何塞|硅谷|矽谷|西雅图|西雅圖|纽约|紐約|🇺🇸|(^|[^A-Za-z])US([^A-Za-z]|$)|(^|[^A-Za-z])USA([^A-Za-z]|$)|United[ -]?States)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/us.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/us.svg"
         },
         {
             name: "VN",
             regex: "(?i)(越南|河内|河內|胡志明|🇻🇳|(^|[^A-Za-z])VN([^A-Za-z]|$)|(^|[^A-Za-z])VNM([^A-Za-z]|$)|Viet[ -]?Nam|Hanoi|Ho[ -]?Chi[ -]?Minh)",
-            icon: "https://testingcf.jsdelivr.net/gh/HatScripts/circle-flags@gh-pages/flags/vn.svg"
+            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/vn.svg"
         }
     ];
 
@@ -449,7 +449,7 @@ function main(params) {
     };
 
     // 远程规则集：MetaCubeX 官方拆分库，全 mrs，默认更新周期一个月（2592000 秒）
-    const RS_BASE = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
+    const RS_BASE = "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@meta/geo";
     const domainProvider = (name, interval = RS_INTERVAL) => ({
         "type": "http",
         "behavior": "domain",
@@ -509,7 +509,7 @@ function main(params) {
         "type": "http",
         "behavior": "domain",
         "format": "mrs",
-        "url": "https://testingcf.jsdelivr.net/gh/wwqgtxx/clash-rules@release/fakeip-filter.mrs",
+        "url": "https://cdn.jsdmirror.com/gh/wwqgtxx/clash-rules@release/fakeip-filter.mrs",
         "path": "./ruleset/fakeip-filter.mrs",
         "interval": RS_INTERVAL
     };
@@ -577,7 +577,7 @@ function main(params) {
     groups.push({
         name: "主代理",
         type: "select",
-        icon: "https://testingcf.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Proxy.png",
+        icon: "https://cdn.jsdmirror.com/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Proxy.png",
         proxies: hasActiveRegions
             ? [...activeRegions.map(region => `${region.name}`), "静态", "直连"]
             : ["静态", "直连"]
@@ -587,7 +587,7 @@ function main(params) {
     groups.push({
         name: "静态",
         type: "select",
-        icon: "https://testingcf.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Static.png",
+        icon: "https://cdn.jsdmirror.com/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Static.png",
         "include-all": true,
         "exclude-type": "direct",
         "exclude-filter": excludeFilter,
@@ -599,7 +599,7 @@ function main(params) {
         name: "直连",
         type: "select",
         hidden: true,
-        icon: "https://testingcf.jsdelivr.net/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Direct.png",
+        icon: "https://cdn.jsdmirror.com/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Direct.png",
         proxies: ["DIRECT"],
         url: TEST_URL_DIRECT
     });
@@ -614,7 +614,7 @@ function main(params) {
     apps.forEach(app => {
         const icon = app.icon.startsWith("http")
             ? app.icon
-            : `https://testingcf.jsdelivr.net/gh/shindgew/WHATSINStash@main/icon/${app.icon}`;
+            : `https://cdn.jsdmirror.com/gh/shindgew/WHATSINStash@main/icon/${app.icon}`;
 
         groups.push({
             name: app.name,
