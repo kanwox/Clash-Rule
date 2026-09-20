@@ -220,7 +220,7 @@ function main(params) {
     const apps = [
         { name: "AI",        icon: "openai.png" },
         { name: "Apple",     icon: "apple.png" },
-        { name: "GitHub",    icon: "https://i.postimg.cc/vTSTYrLQ/github.png" },
+        { name: "GitHub",    icon: "https://cdn.jsdmirror.com/gh/kanwox/Stash-Conf@main/github.png" },
         { name: "Google",    icon: "google.png" },
         { name: "Microsoft", icon: "microsoft.png" },
         { name: "Spotify",   icon: "spotify.png" },
