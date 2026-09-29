@@ -1,4 +1,4 @@
-// Clash_rule.js v5.3
+// Clash_rule.js v5.4
 // 注意：需较新的 mihomo 内核；首次启动需联网下载规则集，请在日志中确认全部下载成功。
 
 // ── 可调参数（集中维护） ──
@@ -8,8 +8,9 @@ const RS_INTERVAL = 2592000;       // 规则集默认更新周期：一个月
 const ADS_INTERVAL = 604800;       // 广告域名规则集更新周期：一周（时效性最强）
 const CN_DNS_DOH = ["https://223.5.5.5/dns-query", "https://doh.pub/dns-query"];
 const CN_DNS_PLAIN = ["223.5.5.5", "119.29.29.29"];
-const TEST_URL_DIRECT = "http://connect.rom.miui.com/generate_204";
 const TEST_URL_PROXY = "https://www.gstatic.com/generate_204";
+const PREFER_H3 = false;          // DNS DoH 是否并发尝试 HTTP/3：UDP 被 QoS/限速或节点不支持 UDP 时反而增加延迟，默认关闭
+const BLOCK_QUIC = false;         // 是否拒绝 UDP 443（QUIC），迫使应用回退 TCP；仅在节点不支持 UDP 时开启（国内直连的 QUIC 也会一并回退 TCP）
 
 // 客户端脚本引擎注入的 console 方法集不统一（部分引擎仅提供 log）；
 // 统一经此输出警告：warn 缺失时降级 log，均缺失时静默，避免 TypeError 中断整次转换
@@ -35,12 +36,14 @@ function main(params) {
     const basicOptions = {
         "unified-delay": true,
         "tcp-concurrent": true,
-        "ipv6": true,
         "find-process-mode": "off",
         // TCP 保活参数（秒）：平衡移动端电量消耗与 NAT 会话活性，避免连接被中间网关静默重置
         "keep-alive-idle": 300,
         "keep-alive-interval": 30
     };
+    // IPv6 继承订阅值：订阅显式开启才开启，未写则关闭（避免纯 IPv4 网络下的双栈失败重试与 AAAA fake-ip 兼容问题）
+    const ipv6Enabled = params.ipv6 === true;
+    params.ipv6 = ipv6Enabled;
     Object.assign(params, basicOptions);
     delete params["global-client-fingerprint"];
 
@@ -128,7 +131,7 @@ function main(params) {
         },
         {
             name: "ID",
-            regex: "(?i)(印度尼西亚|印度尼西亞|印尼|雅加达|雅加達|🇮🇩|Indonesia|Jakarta|(?:^|[|/·?][ ]*)ID(?:[ ]*(?:[|/_·?-]|[0-9])|$)|(?:^|[^A-Za-z0-9])IDN(?:[^A-Za-z]|$))",
+            regex: "(?i)(印度尼西亚|印度尼西亞|印尼|雅加达|雅加達|🇮🇩|Indonesia|Jakarta|(?:^|[|/·?｜丨][ ]*)ID(?:[ ]*(?:[|/_·?｜丨-]|[0-9])|$)|(?:^|[^A-Za-z0-9])IDN(?:[^A-Za-z]|$))",
             icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/id.svg"
         },
         {
@@ -267,6 +270,29 @@ function main(params) {
         return refValid(bare[bare.length - 1]) ? s : s.slice(0, hash);
     };
 
+    // 节点解析 DNS（proxy-server-nameserver 及其 policy）不得经代理/策略组出站：
+    // 解析节点自身域名时若依赖代理组，会形成 "需要节点才能解析节点" 的循环。
+    // 因此一律剥掉 "#组名/节点名" 引用，仅保留 h3=/ecs= 等参数段
+    let psnRefStripped = false;
+    const stripProxyRefs = entry => {
+        const s = String(entry);
+        const hash = s.indexOf("#");
+        if (hash === -1) return s;
+        const params = s.slice(hash + 1).split("&")
+            .map(seg => seg.trim())
+            .filter(seg => seg !== "" && seg.includes("="));
+        const bare = s.slice(hash + 1).split("&")
+            .map(seg => seg.trim())
+            .filter(seg => seg !== "" && !seg.includes("="));
+        if (bare.length > 0) psnRefStripped = true;
+        return params.length > 0 ? s.slice(0, hash) + "#" + params.join("&") : s.slice(0, hash);
+    };
+    const stripProxyRefsPolicy = policy => {
+        const out = {};
+        for (const k of Object.keys(policy)) out[k] = [].concat(policy[k]).map(stripProxyRefs);
+        return out;
+    };
+
     const subPSN = [].concat(subDNS["proxy-server-nameserver"] || []).map(stripDanglingRef);
     const subNS = [].concat(subDNS["nameserver"] || []).map(stripDanglingRef);
     const subPolicy = Object.assign({}, subDNS["nameserver-policy"] || {});
@@ -328,8 +354,8 @@ function main(params) {
 
     if (psnExplicit) {
         // 机场显式设置了节点 DNS，独占使用，不混入公共 DNS
-        proxyServerNameserver = [...new Set(subPSN)];
-        proxyServerNameserverPolicy = subPSNPolicy;
+        proxyServerNameserver = [...new Set(subPSN.map(stripProxyRefs))];
+        proxyServerNameserverPolicy = stripProxyRefsPolicy(subPSNPolicy);
     } else {
         // 节点 policy 按未设置处理：为它收集的旧 rule-set 依赖一并放弃，
         // 否则并入的 provider 无人引用，只会凭空多下载规则集
@@ -358,10 +384,10 @@ function main(params) {
         } else if (subNS.length > 0 || Object.keys(subPolicy).length > 0) {
             // 普通域名解析策略/服务器按原优先关系迁入节点解析（policy 优先于 nameserver 的相对关系不变）
             proxyServerNameserver = subNS.length > 0
-                ? [...new Set(subNS)]
+                ? [...new Set(subNS.map(stripProxyRefs))]
                 : [...CN_DNS_DOH];
             proxyServerNameserverPolicy = Object.keys(subPolicy).length > 0
-                ? Object.assign({}, subPolicy)
+                ? stripProxyRefsPolicy(subPolicy)
                 : undefined;
         } else {
             // 原配置没有任何可继承的解析信息，才使用脚本默认公共 DNS
@@ -370,15 +396,22 @@ function main(params) {
         }
     }
 
+    if (psnRefStripped) {
+        warnLog("[Clash_rule.js] 节点解析 DNS 中的 \"#组名/节点名\" 引用已剥离（节点解析不得依赖代理出站，否则形成循环）。");
+    }
+
+    // DNS 层 IPv6：订阅显式指定则继承，否则跟随全局 ipv6 开关
+    const dnsIPv6 = subDNS["ipv6"] !== undefined ? subDNS["ipv6"] : ipv6Enabled;
+
     params["dns"] = {
         "enable": true,
         "listen": "127.0.0.1:1053",
-        "ipv6": subDNS["ipv6"] !== undefined ? subDNS["ipv6"] : true, // 允许解析 AAAA 记录，确保节点可获取 IPv6 地址
-        "prefer-h3": true,
+        "ipv6": dnsIPv6,
+        "prefer-h3": PREFER_H3,
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
-        // IPv6 fake-ip 段：官方示例的文档专用段；勿改用 fc00::/7 等内网保留地址，避免与真实局域网冲突
-        "fake-ip-range6": "fdfe:dcba:9876::/64",
+        // IPv6 fake-ip 段（仅 DNS 启用 IPv6 时输出）：官方示例的文档专用段；勿改用 fc00::/7 等内网保留地址，避免与真实局域网冲突
+        ...(dnsIPv6 ? { "fake-ip-range6": "fdfe:dcba:9876::/64" } : {}),
         "cache-algorithm": "arc",
         // 显式声明，不依赖内核默认值；上方已校验订阅原模式缺省/blacklist 才会走到这里
         "fake-ip-filter-mode": "blacklist",
@@ -434,7 +467,8 @@ function main(params) {
         // cn-domain 分类的冷门国内站点）用国内 DNS 解析，避免退回 nameserver 走主代理查询海外 DNS
         // 用纯 IP 而非 DoH：该字段用 DoH 时有部分环境会反复回退到 default-nameserver 重复解析、拖高延迟
         "direct-nameserver": [...CN_DNS_PLAIN],
-        // 仅当 direct-nameserver 未覆盖时才回退到 nameserver-policy，
+        // true：DIRECT 命中的域名先按下方 nameserver-policy 解析（policy 优先），
+        // 未被 policy 覆盖的才落到 direct-nameserver；
         // 保证 private-domain/ads-domain/cn-domain 现有的针对性覆盖仍优先生效
         "direct-nameserver-follow-policy": true,
         "nameserver-policy": Object.assign({}, subPolicy, {
@@ -594,14 +628,13 @@ function main(params) {
         "empty-fallback": "REJECT"
     });
 
-    // 隐藏直连测速组：主面板不展示卡片，仅供内部选择和走国内测速
+    // 隐藏直连组：主面板不展示卡片，仅供内部选择引用
     groups.push({
         name: "直连",
         type: "select",
         hidden: true,
         icon: "https://cdn.jsdmirror.com/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Direct.png",
-        proxies: ["DIRECT"],
-        url: TEST_URL_DIRECT
+        proxies: ["DIRECT"]
     });
 
     // App策略组
@@ -658,6 +691,8 @@ function main(params) {
         // 系统对时属于基础功能，优先于业务分流；很多代理节点会丢弃/限制 UDP 123，
         // 时间偏差过大会连带导致全局 HTTPS/TLS 证书校验失败
         "AND,((DST-PORT,123),(NETWORK,udp)),DIRECT",
+        // 可选：拒绝 QUIC，迫使浏览器/应用立即回退 TCP（见顶部 BLOCK_QUIC）
+        ...(BLOCK_QUIC ? ["AND,((DST-PORT,443),(NETWORK,udp)),REJECT"] : []),
 
         "RULE-SET,youtube-domain,YouTube",
         "RULE-SET,twitch-domain,Twitch",
