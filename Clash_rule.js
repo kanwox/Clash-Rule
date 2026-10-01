@@ -1,6 +1,5 @@
 // Clash_rule.js V5.4
 // 需较新的 mihomo 内核；首次启动联网下载规则集，在日志确认全部下载成功。
-// 整体重建 dns / rule-providers / proxy-groups / rules 四段：订阅原值不保留，只被取料（DNS 策略、节点、provider、必要的旧规则集）。
 
 // ── 可调参数（集中维护） ──
 const DEFAULT_IP_VERSION = "dual"; // 双栈偏好：dual(并发择优) / ipv6-prefer / ipv4-prefer
@@ -23,9 +22,28 @@ const warnLog = (...args) => {
     else if (typeof console.log === "function") console.log(...args);
 };
 
+const isPlainObject = value =>
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value);
+
 function main(params) {
     if (!params || typeof params !== "object") params = {};
     if (!Array.isArray(params.proxies)) params.proxies = [];
+
+    // 内核要求节点名非空且唯一，空名/非法条目会让整份配置启动失败，直接丢弃
+    params.proxies = params.proxies.filter(
+        proxy =>
+            proxy &&
+            typeof proxy.name === "string" &&
+            proxy.name !== ""
+    );
+
+    // 记住面板手动选择与 fake-ip 缓存；订阅已设置的项以订阅为准
+    params.profile = Object.assign(
+        { "store-selected": true, "store-fake-ip": true },
+        isPlainObject(params.profile) ? params.profile : {}
+    );
 
     // 订阅自身是否使用代理集合（决定地区组是全量还是按节点数筛选）
     const subHasProviders =
@@ -156,7 +174,7 @@ function main(params) {
         },
         {
             name: "KR",
-            regex: "(?i)(韩国|韓国|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
+            regex: "(?i)(韩国|韓國|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
             icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/kr.svg"
         },
         {
@@ -206,39 +224,7 @@ function main(params) {
         }
     ];
 
-    // 内核用 Go 正则，JS 侧不支持 (?i) 前缀
-    const toJsRegex = goStyleRegex =>
-        new RegExp(goStyleRegex.replace(/^\(\?i\)/, ""), "i");
-
-    const allProxies = params.proxies.filter(
-        proxy => proxy && proxy.type !== "direct"
-    );
-    const excludeRe = toJsRegex(excludeFilter);
-
-    const matchedRegions = regions.filter(region => {
-        const regex = toJsRegex(region.regex);
-        let count = 0;
-
-        for (const proxy of allProxies) {
-            if (
-                proxy &&
-                proxy.name &&
-                regex.test(proxy.name) &&
-                !excludeRe.test(proxy.name)
-            ) {
-                count++;
-                if (count >= REGION_MIN_NODES) return true;
-            }
-        }
-
-        return false;
-    });
-
-    // provider 订阅时脚本期看不到节点，维持全量地区组
-    const activeRegions = subHasProviders ? regions : matchedRegions;
-    const hasActiveRegions = activeRegions.length > 0;
-
-    // App 组名单与图标（OWN_GROUPS 派生与末尾组生成共用，单一来源）
+    // App 组名单与图标（OWN_GROUPS 派生与组生成共用）
     const apps = [
         { name: "AI", icon: "openai.png" },
         { name: "Apple", icon: "apple.png" },
@@ -257,11 +243,7 @@ function main(params) {
         { name: "YouTube", icon: "youtube.png" }
     ];
 
-    // ── 订阅 DNS 悬空引用清洗 ──
-    // 脚本重建全部规则集与策略组，订阅 DNS 里指向它们的 "rule-set:" 键、"#组名" 后缀原样并入会硬报错；
-    // geosite:/geoip: 引用还会触发内核额外下载 geo 文件，与本脚本不引入 geo 的设计冲突。脚本自身引用在下方独立写入，不受影响
-
-    // 脚本固定生成的组名（App 名由 apps 派生，单一来源）
+    // 脚本固定生成的组名（App 名由 apps 派生）
     const OWN_GROUPS = [
         "主代理",
         "静态",
@@ -281,14 +263,9 @@ function main(params) {
         "RULES"
     ]);
 
-    // 取自实际会建组的 activeRegions，避免引用到节点不足未建组的地区（内核找不到目标组）
-    const REGION_NAMES = new Set(
-        activeRegions.map(region => region.name)
-    );
-
     // 内核中节点与策略组共享同一命名空间，且要求节点名唯一：与自建组/地区组/内建 outbound 重名的节点、
-    // 以及订阅内的重名节点，都会让内核启动直接报错，这里抢先改名。须在 PROXY_NAMES 收集与组生成前完成；
-    // 改名后的节点名照常参与地区分类（如 "节点·US" 仍命中 US 正则的独立 token 条件）
+    // 以及订阅内的重名节点，都会让内核启动直接报错，这里抢先改名。须在地区统计、PROXY_NAMES 收集与
+    // 组生成前完成；改名后的节点名照常参与地区分类（如 "节点·US" 仍命中 US 正则的独立 token 条件）
     const RESERVED_NAMES = new Set([
         ...OWN_GROUPS,
         ...regions.map(region => region.name),
@@ -298,14 +275,6 @@ function main(params) {
     const usedProxyNames = new Set();
 
     params.proxies.forEach(proxy => {
-        if (
-            !proxy ||
-            typeof proxy.name !== "string" ||
-            proxy.name === ""
-        ) {
-            return;
-        }
-
         let name = proxy.name;
 
         if (RESERVED_NAMES.has(name) || usedProxyNames.has(name)) {
@@ -330,6 +299,46 @@ function main(params) {
         usedProxyNames.add(name);
     });
 
+    // 内核用 Go 正则，JS 侧不支持 (?i) 前缀
+    const toJsRegex = goStyleRegex =>
+        new RegExp(goStyleRegex.replace(/^\(\?i\)/, ""), "i");
+
+    // direct / reject 类型不进任何可选组，与下方组的 exclude-type 保持一致
+    const allProxies = params.proxies.filter(
+        proxy => proxy.type !== "direct" && proxy.type !== "reject"
+    );
+    const excludeRe = toJsRegex(excludeFilter);
+
+    const matchedRegions = regions.filter(region => {
+        const regex = toJsRegex(region.regex);
+        let count = 0;
+
+        for (const proxy of allProxies) {
+            if (
+                regex.test(proxy.name) &&
+                !excludeRe.test(proxy.name)
+            ) {
+                count++;
+                if (count >= REGION_MIN_NODES) return true;
+            }
+        }
+
+        return false;
+    });
+
+    // provider 订阅时脚本期看不到节点，维持全量地区组
+    const activeRegions = subHasProviders ? regions : matchedRegions;
+    const hasActiveRegions = activeRegions.length > 0;
+
+    // ── 订阅 DNS 悬空引用清洗 ──
+    // 订阅 DNS 里指向已重建规则集/策略组的 "rule-set:" 键、"#组名" 后缀原样并入会硬报错；
+    // geosite:/geoip: 引用会触发内核额外下载 geo 文件，均须清洗。脚本自身引用在下方独立写入，不受影响
+
+    // 取自实际会建组的 activeRegions，避免引用到节点不足未建组的地区（内核找不到目标组）
+    const REGION_NAMES = new Set(
+        activeRegions.map(region => region.name)
+    );
+
     // 本地节点名并入合法引用集："#节点名" 指定解析节点是内核支持的写法，不识别会被误剥；provider 订阅下该集合为空
     const PROXY_NAMES = new Set(
         allProxies.map(proxy => proxy && proxy.name).filter(Boolean)
@@ -341,11 +350,6 @@ function main(params) {
         OWN_GROUPS.indexOf(ref) !== -1 ||
         REGION_NAMES.has(ref) ||
         PROXY_NAMES.has(ref);
-
-    const isPlainObject = value =>
-        value &&
-        typeof value === "object" &&
-        !Array.isArray(value);
 
     const asPlainObject = value =>
         isPlainObject(value) ? value : {};
@@ -423,7 +427,7 @@ function main(params) {
 
     // ── 读取订阅 DNS ──
     // 无"拒绝生成"分支：不可迁移字段一律静默丢弃、以脚本配置为准，永远输出完整配置；
-    // 仅读取被异常打断时放弃订阅 DNS 整段（按无 DNS 处理），输出唯一一条提示（见下方 catch）
+    // 仅读取被异常打断时放弃订阅 DNS 整段（按无 DNS 处理，见下方 catch）
     const deriveSubDNS = rawDNS => {
         const subDNS = isPlainObject(rawDNS) ? rawDNS : {};
 
@@ -590,7 +594,6 @@ function main(params) {
 
         dnsInfo = deriveSubDNS(rawDNS);
     } catch (error) {
-        // 全脚本唯一一条告警
         warnLog(
             "[Clash_rule.js] 读取订阅 DNS 时出错（" +
                 (error && error.message
@@ -684,12 +687,12 @@ function main(params) {
                       proxyServerNameserverPolicy
               }
             : {}),
-        // 订阅指定了 DNS 就独占使用；否则用规则默认（走主代理隧道查询）兜底
+        // 订阅指定了 DNS 就独占使用；否则用海外 DoH 兜底。#RULES：按路由规则出站（未匹配项经 MATCH 落主代理），与组名解耦
         nameserver: subNS.length > 0
             ? [...new Set(subNS)]
             : [
-                  "https://1.1.1.1/dns-query#主代理",
-                  "https://8.8.8.8/dns-query#主代理"
+                  "https://1.1.1.1/dns-query#RULES",
+                  "https://8.8.8.8/dns-query#RULES"
               ],
         // DIRECT 命中且未被 nameserver-policy 覆盖的域名（未收录 cn-domain 的冷门国内站点）用国内 DNS，避免退回主代理查海外。
         // 用纯 IP：该字段用 DoH 在部分环境会反复回退 default-nameserver 重复解析、拖高延迟
@@ -876,8 +879,6 @@ function main(params) {
     const FP_OK = ["vless", "vmess", "trojan"];
 
     params.proxies.forEach(proxy => {
-        if (!proxy) return;
-
         // 不覆盖订阅已有的取值
         if (
             proxy.type !== "direct" &&
@@ -930,6 +931,27 @@ function main(params) {
             if (!provider || typeof provider !== "object") {
                 return;
             }
+
+            // 组的 url 健康检查只测 proxies 字段成员，provider 节点须靠 provider 自身的 health-check 产出延迟数据，
+            // 否则地区 url-test 组拿不到延迟、永远选中第一个节点。enable 强制开启，其余项以订阅为准
+            const subHealthCheck = isPlainObject(
+                provider["health-check"]
+            )
+                ? provider["health-check"]
+                : {};
+
+            provider["health-check"] = Object.assign(
+                {
+                    enable: true,
+                    url: TEST_URL_PROXY,
+                    interval: 300,
+                    timeout: 5000,
+                    "expected-status": 204,
+                    lazy: true
+                },
+                subHealthCheck,
+                { enable: true }
+            );
 
             const override = provider.override;
 
@@ -984,13 +1006,13 @@ function main(params) {
             : ["静态", "直连"]
     });
 
-    // 静态：收全部节点（排除 direct 与信息类节点），给不想选地区的人兜底
+    // 静态：收全部节点（排除 direct / reject 与信息类节点），给不想选地区的人兜底
     groups.push({
         name: "静态",
         type: "select",
         icon: "https://cdn.jsdmirror.com/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Static.png",
         "include-all": true,
-        "exclude-type": "direct",
+        "exclude-type": "direct|reject",
         "exclude-filter": excludeFilter,
         "empty-fallback": "REJECT"
     });
@@ -1022,7 +1044,7 @@ function main(params) {
             icon,
             proxies: appProxiesList,
             "include-all": true,
-            "exclude-type": "direct",
+            "exclude-type": "direct|reject",
             "exclude-filter": excludeFilter
         });
     });
@@ -1035,7 +1057,7 @@ function main(params) {
             hidden: true,
             icon: region.icon,
             "include-all": true,
-            "exclude-type": "direct",
+            "exclude-type": "direct|reject",
             filter: region.regex,
             "exclude-filter": excludeFilter,
             // provider 订阅下可能一个节点都匹配不上，用 REJECT 兜底而不是留空组
@@ -1054,11 +1076,7 @@ function main(params) {
     // 转换期能确定时留一条日志；provider 订阅节点不可见，此检查覆盖不到，只能看内核日志
     if (!subHasProviders) {
         const usableCount = allProxies.filter(
-            proxy =>
-                proxy &&
-                typeof proxy.name === "string" &&
-                proxy.name !== "" &&
-                !excludeRe.test(proxy.name)
+            proxy => !excludeRe.test(proxy.name)
         ).length;
 
         if (usableCount === 0) {
