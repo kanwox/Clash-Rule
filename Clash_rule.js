@@ -749,6 +749,7 @@ function main(params) {
         "google-domain": "google",
         "apple-domain": "apple",
         "microsoft-domain": "microsoft",
+        "proxy-domain": "geolocation-!cn",
         "cn-domain": "cn"
     };
 
@@ -1125,6 +1126,8 @@ function main(params) {
         "RULE-SET,google-domain,Google",
         "RULE-SET,apple-domain,Apple",
         "RULE-SET,microsoft-domain,Microsoft",
+
+        "RULE-SET,proxy-domain,主代理",
 
         "RULE-SET,cn-domain,DIRECT",
         // no-resolve：Fake-IP 域名直接跳过，避免未收录站点进 MATCH 前被海外 nameserver 解析引入延迟
