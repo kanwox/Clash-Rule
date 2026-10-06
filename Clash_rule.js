@@ -4,7 +4,7 @@
 // ── 可调参数（集中维护） ──
 const DEFAULT_IP_VERSION = "dual"; // 双栈偏好：dual(并发择优) / ipv6-prefer / ipv4-prefer
 const REGION_MIN_NODES = 2;        // 达到该值才建组；provider 订阅时节点不可见，不参与判断
-const RS_INTERVAL = 2592000;       // 规则集默认更新周期
+const RS_INTERVAL = 604800;        // 规则集默认更新周期：一周
 const ADS_INTERVAL = 604800;       // 广告规则集：一周（时效性最强）
 const CN_DNS_DOH = [
     "https://223.5.5.5/dns-query",
