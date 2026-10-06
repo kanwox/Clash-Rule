@@ -4,8 +4,7 @@
 // ── 可调参数（集中维护） ──
 const DEFAULT_IP_VERSION = "dual"; // 双栈偏好：dual(并发择优) / ipv6-prefer / ipv4-prefer
 const REGION_MIN_NODES = 2;        // 达到该值才建组；provider 订阅时节点不可见，不参与判断
-const RS_INTERVAL = 604800;        // 规则集默认更新周期：一周
-const ADS_INTERVAL = 604800;       // 广告规则集：一周（时效性最强）
+const RS_INTERVAL = 604800;        // 规则集更新周期：一周
 const CN_DNS_DOH = [
     "https://223.5.5.5/dns-query",
     "https://doh.pub/dns-query"
@@ -711,13 +710,13 @@ function main(params) {
     const RS_BASE =
         "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@meta/geo";
 
-    const domainProvider = (name, interval = RS_INTERVAL) => ({
+    const domainProvider = name => ({
         type: "http",
         behavior: "domain",
         format: "mrs",
         url: `${RS_BASE}/geosite/${name}.mrs`,
         path: `./ruleset/geosite-${name}.mrs`,
-        interval
+        interval: RS_INTERVAL
     });
 
     const ipProvider = name => ({
@@ -763,10 +762,7 @@ function main(params) {
     params["rule-providers"] = {};
 
     Object.keys(DOMAIN_SETS).forEach(key => {
-        params["rule-providers"][key] =
-            key === "ads-domain"
-                ? domainProvider(DOMAIN_SETS[key], ADS_INTERVAL)
-                : domainProvider(DOMAIN_SETS[key]);
+        params["rule-providers"][key] = domainProvider(DOMAIN_SETS[key]);
     });
 
     Object.keys(IP_SETS).forEach(key => {
