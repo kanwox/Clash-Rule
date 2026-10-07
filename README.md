@@ -33,14 +33,14 @@ https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js
 
 **⚡ 性能与稳定**
 - 规则集全量 mrs 二进制格式 + 本地缓存：加载快、内存占用低
-- 广告规则周更，其余月更
+- 规则集每周自动更新
 - HTTP / TLS / QUIC 全协议嗅探，纯 IP 流量也能还原域名参与分流；小米云服务、Apple、OpenAI 等敏感服务跳过嗅探
-- TCP 保活参数调优，移动端显著省电
+- TCP 保活参数调优，兼顾移动端电量与连接稳定
 - 节点全部被过滤时输出警告日志，避免静默断网
 
 **🔧 节点增强（全自动，无需手动配置）**
 - vless / vmess / trojan 自动补全 uTLS chrome 指纹
-- 统一双栈并发连接（IPv4/IPv6 同时测速择优）
+- 统一双栈并发连接（IPv4/IPv6 并发择优）
 - 机场订阅节点经 override 同步生效以上全部增强
 - 与策略组 / 地区组 / 内建 outbound 重名的节点自动改名、订阅内重名节点自动去重，避免内核启动报错
 
