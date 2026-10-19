@@ -1060,8 +1060,8 @@ function main(params) {
         "RULE-SET,proxy-domain,主代理",
 
         "RULE-SET,cn-domain,DIRECT",
-        // no-resolve：Fake-IP 域名直接跳过，避免未收录站点进 MATCH 前被海外 nameserver 解析引入延迟
-        "RULE-SET,cn-ip,DIRECT,no-resolve",
+        
+        "RULE-SET,cn-ip,DIRECT",
 
         "MATCH,主代理"
     ];
