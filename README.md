@@ -19,13 +19,13 @@
 三份配置共有：
 
 ```text
-分流顺序：私网 / 广告 / 对时 → 应用独立分流 → 国内直连 → 海外兜底
-
 主代理
 ├─ 地区测速组（自动识别，隐藏）
 ├─ 静态（全部节点）
 └─ DIRECT
 AI · Apple · GitHub · Google · Microsoft · Spotify · Telegram · TikTok · TV · X · YouTube（出口独立可选）
+
+分流顺序：私网 / 广告 / 对时 → 应用独立分流 → 国内直连 → 海外兜底
 ```
 
 - **TV 聚合**：Netflix · Disney+ · HBO · Prime Video · Apple TV+ 共用一个策略组
@@ -39,11 +39,11 @@ AI · Apple · GitHub · Google · Microsoft · Spotify · Telegram · TikTok ·
 
 - 23 个地区，同地区 ≥2 个节点才建组
 - 应用组出口可选主代理 / 直连 / 地区组 / 单个节点
+- HTTP / TLS / QUIC 嗅探，纯 IP 流量还原域名参与分流
 - fake-ip DNS，继承订阅原有解析策略并清洗失效引用，广告域名 DNS 层拒绝
 - fake-ip 豁免清单：内置 + 社区规则集
 - 节点增强：uTLS 指纹补全、双栈并发、自然排序、重名去重
 - 统一延迟、TCP 并发、保活调优
-- HTTP / TLS / QUIC 嗅探，纯 IP 流量还原域名参与分流
 - 规则集 mrs 二进制格式
 - 过滤「剩余流量 / 到期 / 客服 / 群」等伪节点
 
