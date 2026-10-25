@@ -1,0 +1,476 @@
+{
+  "log": {
+    "level": "warn",
+    "timestamp": true
+  },
+  "http_clients": [
+    {
+      "tag": "ruleset-client",
+      "detour": "Direct"
+    }
+  ],
+  "dns": {
+    "servers": [
+      {
+        "type": "fakeip",
+        "tag": "dns-fakeip",
+        "inet4_range": "198.18.0.0/15"
+      },
+      {
+        "type": "https",
+        "tag": "dns-remote",
+        "server": "1.1.1.1",
+        "path": "/dns-query",
+        "detour": "Proxy"
+      },
+      {
+        "type": "https",
+        "tag": "dns-cn",
+        "server": "223.5.5.5",
+        "path": "/dns-query",
+        "detour": "Direct"
+      }
+    ],
+    "rules": [
+      {
+        "rule_set": [
+          "ads"
+        ],
+        "action": "reject"
+      },
+      {
+        "query_type": [
+          "HTTPS",
+          "SVCB"
+        ],
+        "action": "reject"
+      },
+      {
+        "rule_set": [
+          "fakeip-filter",
+          "private",
+          "cn"
+        ],
+        "action": "route",
+        "server": "dns-cn"
+      },
+      {
+        "query_type": [
+          "AAAA"
+        ],
+        "action": "reject"
+      },
+      {
+        "query_type": [
+          "A"
+        ],
+        "action": "route",
+        "server": "dns-fakeip"
+      }
+    ],
+    "final": "dns-cn",
+    "strategy": "ipv4_only"
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 2080
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "selector",
+      "tag": "Proxy",
+      "outbounds": [
+        "HK",
+        "JP",
+        "KR",
+        "SG",
+        "TW",
+        "US",
+        "Static",
+        "Direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "Static",
+      "outbounds": [
+        "__NODE_PLACEHOLDER__"
+      ]
+    },
+    {
+      "type": "urltest",
+      "tag": "HK",
+      "outbounds": [
+        "__NODE_PLACEHOLDER__"
+      ],
+      "url": "http://www.gstatic.com/generate_204"
+    },
+    {
+      "type": "urltest",
+      "tag": "JP",
+      "outbounds": [
+        "__NODE_PLACEHOLDER__"
+      ],
+      "url": "http://www.gstatic.com/generate_204"
+    },
+    {
+      "type": "urltest",
+      "tag": "KR",
+      "outbounds": [
+        "__NODE_PLACEHOLDER__"
+      ],
+      "url": "http://www.gstatic.com/generate_204"
+    },
+    {
+      "type": "urltest",
+      "tag": "SG",
+      "outbounds": [
+        "__NODE_PLACEHOLDER__"
+      ],
+      "url": "http://www.gstatic.com/generate_204"
+    },
+    {
+      "type": "urltest",
+      "tag": "TW",
+      "outbounds": [
+        "__NODE_PLACEHOLDER__"
+      ],
+      "url": "http://www.gstatic.com/generate_204"
+    },
+    {
+      "type": "urltest",
+      "tag": "US",
+      "outbounds": [
+        "__NODE_PLACEHOLDER__"
+      ],
+      "url": "http://www.gstatic.com/generate_204"
+    },
+    {
+      "type": "selector",
+      "tag": "AI",
+      "outbounds": [
+        "Proxy",
+        "HK",
+        "JP",
+        "KR",
+        "SG",
+        "TW",
+        "US",
+        "Direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "Apple",
+      "outbounds": [
+        "Proxy",
+        "HK",
+        "JP",
+        "KR",
+        "SG",
+        "TW",
+        "US",
+        "Direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "Google",
+      "outbounds": [
+        "Proxy",
+        "HK",
+        "JP",
+        "KR",
+        "SG",
+        "TW",
+        "US",
+        "Direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "YouTube",
+      "outbounds": [
+        "Proxy",
+        "HK",
+        "JP",
+        "KR",
+        "SG",
+        "TW",
+        "US",
+        "Direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "TV",
+      "outbounds": [
+        "Proxy",
+        "HK",
+        "JP",
+        "KR",
+        "SG",
+        "TW",
+        "US",
+        "Direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "Game",
+      "outbounds": [
+        "Proxy",
+        "HK",
+        "JP",
+        "KR",
+        "SG",
+        "TW",
+        "US",
+        "Direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "Telegram",
+      "outbounds": [
+        "Proxy",
+        "HK",
+        "JP",
+        "KR",
+        "SG",
+        "TW",
+        "US",
+        "Direct"
+      ]
+    },
+    {
+      "type": "direct",
+      "tag": "Direct"
+    }
+  ],
+  "route": {
+    "default_http_client": "ruleset-client",
+    "rules": [
+      {
+        "action": "sniff",
+        "timeout": "300ms"
+      },
+      {
+        "rule_set": [
+          "ads"
+        ],
+        "action": "reject"
+      },
+      {
+        "protocol": [
+          "bittorrent"
+        ],
+        "action": "reject"
+      },
+      {
+        "ip_is_private": true,
+        "action": "route",
+        "outbound": "Direct"
+      },
+      {
+        "rule_set": [
+          "private"
+        ],
+        "action": "route",
+        "outbound": "Direct"
+      },
+      {
+        "rule_set": [
+          "ai"
+        ],
+        "action": "route",
+        "outbound": "AI"
+      },
+      {
+        "rule_set": [
+          "youtube"
+        ],
+        "action": "route",
+        "outbound": "YouTube"
+      },
+      {
+        "rule_set": [
+          "netflix",
+          "disney",
+          "spotify"
+        ],
+        "action": "route",
+        "outbound": "TV"
+      },
+      {
+        "rule_set": [
+          "google"
+        ],
+        "action": "route",
+        "outbound": "Google"
+      },
+      {
+        "rule_set": [
+          "apple"
+        ],
+        "action": "route",
+        "outbound": "Apple"
+      },
+      {
+        "rule_set": [
+          "telegram",
+          "telegram-ip"
+        ],
+        "action": "route",
+        "outbound": "Telegram"
+      },
+      {
+        "rule_set": [
+          "steam"
+        ],
+        "action": "route",
+        "outbound": "Game"
+      },
+      {
+        "rule_set": [
+          "cn",
+          "cn-ip"
+        ],
+        "action": "route",
+        "outbound": "Direct"
+      },
+      {
+        "rule_set": [
+          "proxy"
+        ],
+        "action": "route",
+        "outbound": "Proxy"
+      }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "ads",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/category-ads-all.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "private",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/private.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "fakeip-filter",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/fakeip-filter.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "ai",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/category-ai-chat-!cn.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "youtube",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/youtube.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "netflix",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/netflix.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "disney",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/disney.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "spotify",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/spotify.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "google",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/google.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "apple",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/apple.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "telegram",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/telegram.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "telegram-ip",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geoip/telegram.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "steam",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/steam.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "cn",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/cn.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "cn-ip",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geoip/cn.srs",
+        "update_interval": "168h"
+      },
+      {
+        "type": "remote",
+        "tag": "proxy",
+        "format": "binary",
+        "url": "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/geolocation-!cn.srs",
+        "update_interval": "168h"
+      }
+    ],
+    "final": "Proxy"
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "store_fakeip": true
+    }
+  }
+}

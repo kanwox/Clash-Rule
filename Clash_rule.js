@@ -233,7 +233,7 @@ function main(params) {
         { name: "Apple", icon: "apple.png" },
         {
             name: "GitHub",
-            icon: "https://cdn.jsdmirror.com/gh/kanwox/Stash-Conf@main/github.png"
+            icon: "https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/assets/github.png"
         },
         { name: "Google", icon: "google.png" },
         { name: "Microsoft", icon: "microsoft.png" },
