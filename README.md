@@ -7,15 +7,14 @@
 | 配置 | raw 直链 | 镜像 |
 |------|----------|------|
 | Clash_rule.js | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js) |
-| Stash 完整配置 | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Stash_conf.yaml) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_conf.yaml) |
-| Stash 覆写模块 | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Stash_Override.stoverride) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_Override.stoverride) |
+| Stash 配置 | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Stash_conf.yaml) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_conf.yaml) |
 | Surfboard 配置 | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Surfboard.conf) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf) |
 
 > 国内网络建议用镜像，两者内容相同。
 
 ## ✨ 通用特性
 
-四份导入物（三个客户端）共有的设计：
+三个客户端共有的设计：
 
 - **应用独立分流**：AI / Apple / GitHub / Google / Microsoft / Spotify / Telegram / TikTok / TV / X / YouTube 各一个策略组，出口可跟随主代理、直连或指定地区
 - **TV 聚合组**：Netflix · Disney+ · HBO · Prime Video · Apple TV+ 共用一个策略组
@@ -46,16 +45,13 @@
 
 ### 二、Stash
 
-适用：iOS / iPadOS / macOS / tvOS 的 Stash。两个文件按场景二选一：
-
-- **Stash_conf.yaml（完整配置）**：从 URL 下载后，把 `proxy-providers` 里的「你的真实订阅链接」替换为实际订阅
-- **Stash_Override.stoverride（覆写模块）**：已导入其它订阅时叠加使用，`#!replace` 整段替换 DNS / 策略组 / 规则集 / 规则，节点保持原配置
+适用：iOS / iPadOS / macOS / tvOS 的 Stash。从 URL 下载配置，把 `proxy-providers` 里的「你的真实订阅链接」替换为实际订阅。
 
 特点：
 
 - fake-ip DNS，国内域名单独指回国内解析器，保留 CDN 就近调度
 - 5 个固定地区组：HK / JP / SG / TW / US
-- 订阅自动过滤伪节点（完整配置靠 provider filter，覆写模块靠组 filter）
+- 订阅自动过滤伪节点（provider filter）
 
 ### 三、Surfboard
 
