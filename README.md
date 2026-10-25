@@ -53,10 +53,10 @@ AI · Apple · GitHub · Google · Microsoft · Spotify · Telegram · TikTok ·
 
 ## 🍏 Stash.yaml
 
-- fake-ip DNS，国内域名指回国内解析器
 - 地区组：HK / JP / SG / TW / US
-- 订阅过滤伪节点
+- fake-ip DNS，国内域名指回国内解析器
 - 规则集 mrs 二进制格式
+- 订阅过滤伪节点
 
 <br>
 
