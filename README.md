@@ -6,9 +6,9 @@
 
 | 配置 | 镜像链接 | 适用 |
 |------|----------|------|
-| Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js` | 支持 JS 脚本覆写的 mihomo 内核客户端 |
-| Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash.yaml` | 全平台 Stash 客户端 |
-| Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf` | Surfboard for android 客户端 |
+| Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash_rule.js` | 支持 JS 脚本覆写的 mihomo 内核客户端 |
+| Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash.yaml` | 全平台 Stash 客户端 |
+| Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard.conf` | Surfboard for android 客户端 |
 
 <br>
 
@@ -18,7 +18,6 @@
 - **应用组出口**：可选主代理 / 直连 / 地区组 / 单个节点
 - **流量嗅探**：HTTP / TLS / QUIC，纯 IP 流量还原域名参与分流
 - **DNS**：fake-ip，继承订阅原有解析策略并清洗失效引用，广告域名 DNS 层拒绝
-- **fake-ip 豁免**：内置 + 社区规则集
 - **节点增强**：uTLS 指纹补全、双栈并发、自然排序、重名去重
 - **内核调优**：统一延迟、TCP 并发、保活
 - **规则集**：mrs 二进制格式
@@ -40,7 +39,7 @@
 ## 🏄 Surfboard.conf
 
 - **地区组**：HK / JP / TW / SG / US
-- **分流**：GeoIP CN 直连
+- **国内直连**：GeoIP CN
 - **规则集**：Surge list 纯文本格式
 
 <br>
