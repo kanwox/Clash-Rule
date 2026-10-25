@@ -241,7 +241,6 @@ function main(params) {
         { name: "Telegram", icon: "telegram.png" },
         { name: "TikTok", icon: "tiktok.png" },
         { name: "TV", icon: "netflix.png" },
-        { name: "Twitch", icon: "twitch.png" },
         { name: "X", icon: "x.png" },
         { name: "YouTube", icon: "youtube.png" }
     ];
@@ -776,7 +775,6 @@ function main(params) {
         "private-domain": "private",
         "ads-domain": "category-ads-all",
         "youtube-domain": "youtube",
-        "twitch-domain": "twitch",
         "twitter-domain": "twitter",
         "tiktok-domain": "tiktok",
         "telegram-domain": "telegram",
@@ -1038,7 +1036,6 @@ function main(params) {
             : []),
 
         "RULE-SET,youtube-domain,YouTube",
-        "RULE-SET,twitch-domain,Twitch",
         "RULE-SET,twitter-domain,X",
         "RULE-SET,tiktok-domain,TikTok",
         "RULE-SET,telegram-domain,Telegram",

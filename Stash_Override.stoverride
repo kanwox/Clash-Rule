@@ -144,14 +144,6 @@ proxy-groups: #!replace
     include-all: true
     filter: '^(?!.*(流量|时间|重置|到期|过期|官网|网址|地址|客服|订阅|通知|群组|有效|本站|防止)).*$'
 
-  - name: Twitch
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Twitch.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    include-all: true
-    filter: '^(?!.*(流量|时间|重置|到期|过期|官网|网址|地址|客服|订阅|通知|群组|有效|本站|防止)).*$'
-
   - name: X
     type: select
     lazy: true
@@ -243,12 +235,6 @@ rule-providers: #!replace
     format: mrs
     path: ./rules/youtube-domain.mrs
     url: "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/youtube.mrs"
-    interval: 604800
-  twitch-domain:
-    behavior: domain
-    format: mrs
-    path: ./rules/twitch-domain.mrs
-    url: "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/twitch.mrs"
     interval: 604800
   twitter-domain:
     behavior: domain
@@ -360,7 +346,6 @@ rules: #!replace
   - RULE-SET,ads-domain,REJECT
   - RULE-SET,spotify-domain,Spotify
   - RULE-SET,youtube-domain,YouTube
-  - RULE-SET,twitch-domain,Twitch
   - RULE-SET,twitter-domain,X
   - RULE-SET,tiktok-domain,TikTok
   - RULE-SET,telegram-domain,Telegram
