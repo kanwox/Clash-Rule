@@ -1,6 +1,6 @@
 # Proxy Rule
 
-**mihomo / Stash / Surfboard 分流配置 —— 高效运行 · 稳定使用 · 方便简洁**
+**高效运行 · 稳定使用 · 方便简洁**
 
 ## 📥 导入链接
 
@@ -8,7 +8,7 @@
 |------|----------|------|
 | Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js` | mihomo 内核客户端 |
 | Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash.yaml` | iOS · macOS · tvOS |
-| Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf` | Android |
+| Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf` | Surfboard 客户端 |
 
 <br>
 
@@ -39,7 +39,7 @@
 
 ## 🏄 Surfboard.conf
 
-- **地区组**：HK / JP / TW / SG / US，从「静态」节点池按正则捞取
+- **地区组**：HK / JP / TW / SG / US
 - **分流**：GeoIP CN 直连
 - **规则集**：Surge list 纯文本格式
 
