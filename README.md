@@ -1,14 +1,10 @@
-# Clash-Rule
+# Proxy Rules
 
-同一套分流思路的三个客户端版本：**mihomo 覆写脚本 · Stash 配置 · Surfboard 配置**。
-
-## 📥 导入链接
-
-| 配置 | 适用 | raw 直链 | 镜像 |
-|------|------|----------|------|
-| Clash_rule.js | mihomo 内核客户端 | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js) |
-| Stash 配置 | iOS / iPadOS / macOS / tvOS | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Stash_conf.yaml) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_conf.yaml) |
-| Surfboard 配置 | Android | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Surfboard.conf) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf) |
+| 配置 | raw 直链 | 镜像 |
+|------|----------|------|
+| `Clash_rule.js` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js) |
+| `Stash_conf.yaml` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Stash_conf.yaml) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_conf.yaml) |
+| `Surfboard.conf` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Surfboard.conf) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf) |
 
 ## 一、Clash_rule.js
 
