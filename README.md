@@ -1,6 +1,8 @@
 # Proxy Rule
 
-**高效运行 · 稳定使用 · 方便简洁**
+> 高效运行 · 稳定使用 · 方便简洁
+>
+> mihomo / Stash / Surfboard 三端分流配置
 
 ## 📥 导入链接
 
@@ -9,6 +11,27 @@
 | Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js` | mihomo 内核客户端 |
 | Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash.yaml` | iOS · macOS · tvOS |
 | Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf` | Android |
+
+<br>
+
+## ✨ 通用特性
+
+三份配置共有：
+
+```text
+分流顺序：私网 / 广告 / 对时 → 应用独立分流 → 国内直连 → 海外兜底
+
+主代理
+├─ 地区测速组（自动识别，隐藏）
+├─ 静态（全部节点）
+└─ DIRECT
+AI · Apple · GitHub · Google · Microsoft · Spotify · Telegram · TikTok · TV · X · YouTube（出口独立可选）
+```
+
+- **TV 聚合**：Netflix · Disney+ · HBO · Prime Video · Apple TV+ 共用一个策略组
+- **真实 IP 豁免**：NTP / STUN / 游戏主机 / 连通性检测域名不参与代理 DNS
+- **规则集每周自动更新**
+- **不含节点**
 
 <br>
 
@@ -42,26 +65,5 @@
 - 地区组：HK / JP / TW / SG / US，从「静态」节点池按正则捞取
 - GeoIP CN 直连
 - 规则集 Surge list 纯文本格式
-
-<br>
-
-## ✨ 通用特性
-
-三份配置共有：
-
-```text
-分流顺序：私网 / 广告 / 对时 → 应用独立分流 → 国内直连 → 海外兜底
-
-主代理
-├─ 地区测速组（自动识别，隐藏）
-├─ 静态（全部节点）
-└─ DIRECT
-AI · Apple · GitHub · Google · Microsoft · Spotify · Telegram · TikTok · TV · X · YouTube（出口独立可选）
-```
-
-- **TV 聚合**：Netflix · Disney+ · HBO · Prime Video · Apple TV+ 共用一个策略组
-- **真实 IP 豁免**：NTP / STUN / 游戏主机 / 连通性检测域名不参与代理 DNS
-- **规则集每周自动更新**
-- **不含节点**
 
 > 首次加载需联网下载规则集。
