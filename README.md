@@ -5,12 +5,12 @@
 | 配置 | 镜像链接 | 适用 |
 |------|----------|------|
 | Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js` | mihomo 内核客户端 |
-| Stash_conf.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_conf.yaml` | iOS · macOS · tvOS |
+| Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash.yaml` | iOS · macOS · tvOS |
 | Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf` | Android |
 
 <br>
 
-## 🧩 Clash_rule.js
+## ⚡ Clash_rule.js
 
 - 23 个地区，同地区 ≥2 个节点才建组
 - 应用组出口可选主代理 / 直连 / 地区组 / 单个节点
@@ -26,7 +26,7 @@
 
 <br>
 
-## 🍏 Stash_conf.yaml
+## 🍏 Stash.yaml
 
 - fake-ip DNS，国内域名指回国内解析器
 - 地区组：HK / JP / SG / TW / US
