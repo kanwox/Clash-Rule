@@ -6,9 +6,9 @@
 
 | 配置 | 镜像链接 | 适用 |
 |------|----------|------|
-| Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js` | mihomo 内核客户端 |
+| Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js` | 支持 JS 脚本覆写的 mihomo 内核客户端 |
 | Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash.yaml` | iOS · macOS · tvOS |
-| Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf` | Surfboard 客户端 |
+| Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf` | Surfboard for android 客户端 |
 
 <br>
 
