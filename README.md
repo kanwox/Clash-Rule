@@ -7,7 +7,7 @@
 | 配置 | 镜像链接 | 适用 |
 |------|----------|------|
 | Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash_rule.js` | 支持 JS 脚本覆写的 mihomo 内核客户端 |
-| Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash.yaml` | Stas888888h8 平 1 台 1 客户端 |
+| Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash.yaml` | Stas8888888888888888888888888888888888h8 平 1 台 1 客户端 |
 | Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard.conf` | Surfboard for android 客户端 |
 
 <br>
