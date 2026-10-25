@@ -1,4 +1,4 @@
-# Proxy Rules
+# Proxy Rule
 
 | 配置 | raw 直链 | 镜像 |
 |------|----------|------|
@@ -8,8 +8,6 @@
 
 ## 一、Clash_rule.js
 
-要求 mihomo 内核 1.18+，仅支持节点平铺订阅。
-
 - 23 个地区，同地区 ≥2 个节点才建组
 - 应用组出口可选主代理 / 直连 / 地区组 / 单个节点
 - DNS 继承订阅原有解析策略并清洗失效引用，广告域名 DNS 层拒绝
@@ -17,13 +15,15 @@
 - HTTP / TLS / QUIC 嗅探，纯 IP 流量还原域名参与分流
 - 过滤「剩余流量 / 到期 / 客服 / 群」等伪节点
 
-## 二、Stash
+要求 mihomo 内核 1.18+，仅支持节点平铺订阅。
+
+## 二、Stash_conf.yaml
 
 - fake-ip DNS，国内域名指回国内解析器
 - 地区组：HK / JP / SG / TW / US
 - 订阅过滤伪节点
 
-## 三、Surfboard
+## 三、Surfboard.conf
 
 - 地区组：HK / JP / TW / SG / US，从「静态」节点池按正则捞取
 - GeoIP CN 直连
