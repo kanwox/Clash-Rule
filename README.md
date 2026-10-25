@@ -2,13 +2,18 @@
 
 ## 📥 导入链接
 
-| 配置 | raw 直链 | 镜像 |
-|------|----------|------|
-| `Clash_rule.js` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js) |
-| `Stash_conf.yaml` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Stash_conf.yaml) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_conf.yaml) |
-| `Surfboard.conf` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Surfboard.conf) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf) |
+Clash_rule.js
+https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js
 
-## ⚡ Clash_rule.js
+Stash_conf.yaml
+https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_conf.yaml
+
+Surfboard.conf
+https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf
+
+---
+
+## 🐱 Clash_rule.js
 
 - 23 个地区，同地区 ≥2 个节点才建组
 - 应用组出口可选主代理 / 直连 / 地区组 / 单个节点
@@ -22,18 +27,24 @@
 
 要求 mihomo 内核 1.18+，仅支持节点平铺订阅。
 
-## 📱 Stash_conf.yaml
+---
+
+## 🐦 Stash_conf.yaml
 
 - fake-ip DNS，国内域名指回国内解析器
 - 地区组：HK / JP / SG / TW / US
 - 订阅过滤伪节点
 - 规则集 mrs 二进制格式
 
-## 🤖 Surfboard.conf
+---
+
+## 🏄 Surfboard.conf
 
 - 地区组：HK / JP / TW / SG / US，从「静态」节点池按正则捞取
 - GeoIP CN 直连
 - 规则集 Surge list 纯文本格式
+
+---
 
 ## ✨ 通用特性
 
