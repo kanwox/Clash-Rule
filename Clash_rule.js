@@ -106,9 +106,9 @@ function main(params) {
 
     // 节点名里的信息类关键词（剩余流量、到期时间、群链接等），这些不该单独成为可选节点
     const excludeFilter =
-        "(?i)(剩余|官网|套餐|流量|到期|过期|更新|刷新|订阅|群|网址|客服|欢迎|加入|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\\d+(\\.\\d+)?\\s*(GB|TB)|\\d+\\s*Days?)([^A-Za-z0-9]|$))";
+        "(?i)(剩余|官网|套餐|流量|到期|过期|重置|更新|刷新|订阅|时间|地址|有效|通知|本站|群|网址|客服|欢迎|加入|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\\d+(\\.\\d+)?\\s*(GB|TB)|\\d+\\s*Days?)([^A-Za-z0-9]|$))";
 
-    // 地区表。regex 两处共用同一串：内核 group filter 是 Go 正则（(?i) 合法），JS 侧经 toJsRegex 转换
+    // 地区表。regex 仅在 JS 侧经 toJsRegex 转换使用
     const regions = [
         {
             name: "AE",
@@ -233,7 +233,7 @@ function main(params) {
         { name: "Apple", icon: "apple.png" },
         {
             name: "GitHub",
-            icon: "https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/assets/github.png"
+            icon: "https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/assets/github.png"
         },
         { name: "Google", icon: "google.png" },
         { name: "Microsoft", icon: "microsoft.png" },
@@ -303,9 +303,10 @@ function main(params) {
     // 自然排序：名字中的连续数字段按数值比较，保证多位数序号排在个位数之后。
     // 排序结果经下方各组的显式 proxies 列表带入最终配置
     const naturalCompare = (a, b) => {
-        const chunkRe = /(\d+)|(\D+)/g;
         const chunk = s => {
             const parts = [];
+            // /g 正则的 exec 状态不跨调用共享
+            const chunkRe = /(\d+)|(\D+)/g;
             let m;
             while ((m = chunkRe.exec(s)) !== null) {
                 parts.push(m[1] !== undefined ? Number(m[1]) : m[2]);

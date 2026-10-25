@@ -7,7 +7,7 @@ proxy-providers:
     url: "你的真实订阅链接"
     interval: 86400
     path: ./all.yaml
-    filter: '^(?!.*(流量|时间|重置|到期|过期|官网|网址|地址|客服|订阅|通知|群组|有效|本站|防止)).*$'
+    filter: '(?i)^(?!.*(流量|时间|重置|到期|过期|官网|网址|地址|客服|订阅|通知|群组|有效|本站|防止|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\d+(\.\d+)?\s*(GB|TB)|\d+\s*Days?)([^A-Za-z0-9]|$))).*$'
 
 # ------------------ DNS ------------------
 dns:
@@ -22,9 +22,9 @@ dns:
   nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
-  # 国内域名单独指回国内解析器，保留 CDN 就近调度准确性
+  # 国内域名单独指回国内解析器，保留 CDN 就近调度准确性；复用下方 cn-domain 规则集
   nameserver-policy:
-    'geosite:cn':
+    'rule-set:cn-domain':
       - 223.5.5.5
       - 119.29.29.29
   # 代理服务器域名解析专用链路
@@ -59,6 +59,29 @@ dns:
     - 'localhost.work.weixin.qq.com'
     - '+.stun.playstation.net'
     - '+.xboxlive.com'
+
+# ------------------ 域名嗅探 ------------------
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  # 纯 IP 流量从 SNI / Host 还原域名参与分流
+  parse-pure-ip: true
+  override-destination: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  # 对证书绑定 / 连接复用敏感，跳过嗅探
+  skip-domain:
+    - 'Mijia Cloud'
+    - '+.apple.com'
+    - '+.openai.com'
+    - '+.oaistatic.com'
+    - '+.oaiusercontent.com'
+    - '+.chatgpt.com'
 
 # ------------------ 策略组 ------------------
 proxy-groups:
