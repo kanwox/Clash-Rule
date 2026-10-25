@@ -1,12 +1,14 @@
 # Proxy Rule
 
+## 📥 导入链接
+
 | 配置 | raw 直链 | 镜像 |
 |------|----------|------|
 | `Clash_rule.js` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Clash_rule.js) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Clash_rule.js) |
 | `Stash_conf.yaml` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Stash_conf.yaml) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Stash_conf.yaml) |
 | `Surfboard.conf` | [raw](https://raw.githubusercontent.com/kanwox/Clash-Rule/main/Surfboard.conf) | [镜像](https://cdn.jsdmirror.com/gh/kanwox/Clash-Rule@main/Surfboard.conf) |
 
-## 一、Clash_rule.js
+## ⚡ Clash_rule.js
 
 - 23 个地区，同地区 ≥2 个节点才建组
 - 应用组出口可选主代理 / 直连 / 地区组 / 单个节点
@@ -20,14 +22,14 @@
 
 要求 mihomo 内核 1.18+，仅支持节点平铺订阅。
 
-## 二、Stash_conf.yaml
+## 📱 Stash_conf.yaml
 
 - fake-ip DNS，国内域名指回国内解析器
 - 地区组：HK / JP / SG / TW / US
 - 订阅过滤伪节点
 - 规则集 mrs 二进制格式
 
-## 三、Surfboard.conf
+## 🤖 Surfboard.conf
 
 - 地区组：HK / JP / TW / SG / US，从「静态」节点池按正则捞取
 - GeoIP CN 直连
@@ -37,11 +39,18 @@
 
 三份配置共有：
 
-- **应用独立分流**：AI / Apple / GitHub / Google / Microsoft / Spotify / Telegram / TikTok / TV / X / YouTube 各一个策略组
+```text
+分流顺序：私网 / 广告 / 对时 → 应用独立分流 → 国内直连 → 海外兜底
+
+主代理
+├─ 地区测速组（自动识别，隐藏）
+├─ 静态（全部节点）
+└─ DIRECT
+AI · Apple · GitHub · Google · Microsoft · Spotify · Telegram · TikTok · TV · X · YouTube（出口独立可选）
+```
+
 - **TV 聚合**：Netflix · Disney+ · HBO · Prime Video · Apple TV+ 共用一个策略组
-- **地区测速组**：按节点名识别地区，自动择优
-- **分流**：私网与国内域名 / IP 直连，海外域名走主代理，广告域名 REJECT
-- **对时与真实 IP 保护**：NTP 强制直连；NTP / STUN / 游戏主机 / 连通性检测域名不参与代理 DNS
+- **真实 IP 豁免**：NTP / STUN / 游戏主机 / 连通性检测域名不参与代理 DNS
 - **规则集每周自动更新**
 - **不含节点**
 
