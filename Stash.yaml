@@ -425,12 +425,12 @@ rules:
   - RULE-SET,qnap-domain,DIRECT
   # 系统对时仅放行 UDP 123；很多节点丢弃 TCP 123 且时间偏差会连带 TLS 校验失败
   - AND,((DST-PORT,123),(NETWORK,udp)),DIRECT
-  - RULE-SET,spotify-domain,Spotify
   - RULE-SET,youtube-domain,YouTube
   - RULE-SET,twitter-domain,X
   - RULE-SET,tiktok-domain,TikTok
   - RULE-SET,telegram-domain,Telegram
   - RULE-SET,telegram-ip,Telegram,no-resolve
+  - RULE-SET,spotify-domain,Spotify
   - RULE-SET,ai-domain,AI
   - RULE-SET,github-domain,GitHub
   - RULE-SET,steam-domain,Steam

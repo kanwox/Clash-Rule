@@ -1055,6 +1055,7 @@ function main(params) {
         "RULE-SET,tiktok-domain,TikTok",
         "RULE-SET,telegram-domain,Telegram",
         "RULE-SET,telegram-ip,Telegram,no-resolve",
+        "RULE-SET,spotify-domain,Spotify",
         "RULE-SET,ai-domain,AI",
         "RULE-SET,github-domain,GitHub",
         "RULE-SET,steam-domain,Steam",
@@ -1065,7 +1066,6 @@ function main(params) {
         "RULE-SET,primevideo-domain,TV",
         "RULE-SET,appletv-domain,TV",
         "RULE-SET,hbo-domain,TV",
-        "RULE-SET,spotify-domain,Spotify",
 
         "RULE-SET,google-domain,Google",
         "RULE-SET,apple-domain,Apple",
