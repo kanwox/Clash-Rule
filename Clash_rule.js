@@ -236,7 +236,7 @@ function main(params) {
 
     const apps = [
         { name: "AI", icon: "ChatGPT.png" },
-        { name: "Apple", icon: "Apple_2.png" },
+        { name: "Apple", icon: "Apple.png" },
         { name: "GitHub", icon: "GitHub.png" },
         { name: "Google", icon: "Google_Search.png" },
         { name: "Microsoft", icon: "Microsoft.png" },
