@@ -4,11 +4,11 @@
 
 ## 📥 导入链接
 
-| 配置 | 镜像链接 | 适用 |
-|------|----------|------|
-| Clash_rule.js | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash_rule.js` | 支持 JS 脚本覆写的 mihomo 内核客户端 |
-| Stash.yaml | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash.yaml` | Stash 全平台客户端 |
-| Surfboard.conf | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard.conf` | Surfboard for android 客户端 |
+| 配置 | 直达链接 | 镜像链接 | 适用 |
+|------|----------|----------|------|
+| Clash_rule.js | `https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash_rule.js` | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash_rule.js` | 支持 JS 脚本覆写的 mihomo 内核客户端 |
+| Stash.yaml | `https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Stash.yaml` | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash.yaml` | Stash 全平台客户端 |
+| Surfboard.conf | `https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surfboard.conf` | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard.conf` | Surfboard for android 客户端 |
 
 <br>
 
@@ -30,9 +30,10 @@
 ## 🍏 Stash.yaml
 
 - **地区组**：HK / JP / SG / TW / US
-- **DNS**：fake-ip，国内域名指回国内解析器
+- **DNS**：fake-ip，国内域名指回国内解析器，私网域名系统解析直连
 - **规则集**：mrs 二进制格式
 - **伪节点过滤**：按关键词自动剔除
+- **分流对齐**：支持群晖/威联通 NAS 服务直连、独立兜底策略组、NTP (UDP:123) 协议精准直连
 
 <br>
 
@@ -41,6 +42,7 @@
 - **地区组**：HK / JP / TW / SG / US
 - **国内直连**：GeoIP CN
 - **规则集**：Surge list 纯文本格式
+- **分流对齐**：支持私网域名与 NAS 服务直连、独立兜底策略组
 
 <br>
 
@@ -53,9 +55,10 @@
 ├─ 地区测速组（自动识别，隐藏）
 ├─ 静态（全部节点）
 └─ DIRECT
-AI · Apple · GitHub · Google · Microsoft · Spotify · Telegram · TikTok · TV · X · YouTube（出口独立可选）
 
-分流顺序：私网 / 广告 / 对时 → 应用独立分流 → 国内直连 → 海外兜底
+AI · Apple · GitHub · Google · Microsoft · PayPal · Spotify · Steam · Telegram · TikTok · TV · X · YouTube（出口独立可选）
+
+分流顺序：私网 / 广告 / NAS / 对时 → 应用独立分流 → 国内直连 → 兜底
 ```
 
 - **TV 聚合**：Netflix · Disney+ · HBO · Prime Video · Apple TV+ 共用一个策略组
