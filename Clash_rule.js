@@ -1,4 +1,4 @@
-// Clash_rule.js V5.5
+// Clash_rule.js V5.6
 // 需较新的 mihomo 内核；首次启动联网下载规则集，在日志确认全部下载成功。
 
 // ── 可调参数（集中维护） ──
@@ -30,7 +30,7 @@ function main(params) {
     if (!params || typeof params !== "object") params = {};
     if (!Array.isArray(params.proxies)) params.proxies = [];
 
-    // 内核要求节点名非空且唯一，空名/非法条目会让整份配置启动失败，直接丢弃
+    // 内核要求节点名非空且唯一，空名或 name 非字符串会让整份配置启动失败，直接丢弃
     params.proxies = params.proxies.filter(
         proxy =>
             proxy &&
@@ -108,147 +108,153 @@ function main(params) {
     const excludeFilter =
         "(?i)(剩余|官网|套餐|流量|到期|过期|重置|更新|刷新|订阅|时间|地址|有效|通知|本站|群|网址|客服|欢迎|加入|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\\d+(\\.\\d+)?\\s*(GB|TB)|\\d+\\s*Days?)([^A-Za-z0-9]|$))";
 
-    // 地区表。regex 仅在 JS 侧经 toJsRegex 转换使用
+    // 所有策略组图标统一使用 Qure Color；jsdmirror 仅作为 CDN 镜像
+    const QURE_ICON_BASE =
+        "https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color";
+    const qureIcon = name => `${QURE_ICON_BASE}/${name}`;
+
+    // 地区表。regex 仅在 JS 侧经 toJsRegex 转换使用；icon 统一为 Qure 文件名
+    // Qure 未提供 AE/BD/ID/NL/VN 独立图标，使用同项目 Area.png；GB 对应 Qure 的 UK.png
     const regions = [
         {
             name: "AE",
             regex: "(?i)(阿联酋|阿聯酋|迪拜|阿布扎比|🇦🇪|(^|[^A-Za-z])UAE([^A-Za-z]|$)|Emirates|Dubai)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/ae.svg"
+            icon: "Area.png"
         },
         {
             name: "AR",
             regex: "(?i)(阿根廷|布宜诺斯艾利斯|🇦🇷|(^|[^A-Za-z])AR([^A-Za-z]|$)|(^|[^A-Za-z])ARG([^A-Za-z]|$)|Argentina)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/ar.svg"
+            icon: "AR.png"
         },
         {
             name: "AU",
             regex: "(?i)(澳大利亚|澳大利亞|澳洲|悉尼|墨尔本|墨爾本|🇦🇺|(^|[^A-Za-z])AU([^A-Za-z]|$)|(^|[^A-Za-z])AUS([^A-Za-z]|$)|Australia|Sydney|Melbourne)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/au.svg"
+            icon: "AU.png"
         },
         {
             name: "BD",
             regex: "(?i)(孟加拉|孟加拉國|达卡|達卡|🇧🇩|(^|[^A-Za-z])BD([^A-Za-z]|$)|(^|[^A-Za-z])BGD([^A-Za-z]|$)|Bangladesh|Dhaka)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/bd.svg"
+            icon: "Area.png"
         },
         {
             name: "BR",
             regex: "(?i)(巴西|圣保罗|聖保羅|🇧🇷|(^|[^A-Za-z])BR([^A-Za-z]|$)|(^|[^A-Za-z])BRA([^A-Za-z]|$)|Brazil|Brasil|SaoPaulo)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/br.svg"
+            icon: "BR.png"
         },
         {
             name: "CA",
             regex: "(?i)(加拿大|多伦多|多倫多|温哥华|溫哥華|🇨🇦|(^|[^A-Za-z])CA([^A-Za-z]|$)|(^|[^A-Za-z])CAN([^A-Za-z]|$)|Canada|Toronto|Vancouver)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/ca.svg"
+            icon: "CA.png"
         },
         {
             name: "DE",
             regex: "(?i)(德国|德國|法兰克福|法蘭克福|🇩🇪|(^|[^A-Za-z])DE([^A-Za-z]|$)|(^|[^A-Za-z])DEU([^A-Za-z]|$)|Germany|Frankfurt)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/de.svg"
+            icon: "DE.png"
         },
         {
             name: "FR",
             regex: "(?i)(法国|法國|巴黎|🇫🇷|(^|[^A-Za-z])FR([^A-Za-z]|$)|(^|[^A-Za-z])FRA([^A-Za-z]|$)|France|Paris)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/fr.svg"
+            icon: "FR.png"
         },
         {
             name: "GB",
             regex: "(?i)(英国|英國|伦敦|倫敦|🇬🇧|(^|[^A-Za-z])UK([^A-Za-z]|$)|(^|[^A-Za-z])GB([^A-Za-z]|$)|(^|[^A-Za-z])GBR([^A-Za-z]|$)|United[ -]?Kingdom|England|London)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/gb.svg"
+            icon: "UK.png"
         },
         {
             name: "HK",
             regex: "(?i)(香港|🇭🇰|(^|[^A-Za-z])HK([^A-Za-z]|$)|(^|[^A-Za-z])HKG([^A-Za-z]|$)|Hong[ -]?Kong)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/hk.svg"
+            icon: "HK.png"
         },
         {
             name: "ID",
             regex: "(?i)(印度尼西亚|印度尼西亞|印尼|雅加达|雅加達|🇮🇩|Indonesia|Jakarta|(^|[^A-Za-z])ID([^A-Za-z]|$)|(^|[^A-Za-z])IDN([^A-Za-z]|$))",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/id.svg"
+            icon: "Area.png"
         },
         {
             // 印度([^尼]|$) 只排除"印度尼西亚"；含独立 token IN 的节点名会同时命中 ID 与 IN，内核各组 filter 相互独立、无组间排除
             name: "IN",
             regex: "(?i)(印度([^尼]|$)|新德里|孟买|孟買|班加罗尔|班加羅爾|🇮🇳|(^|[^A-Za-z])India([^A-Za-z]|$)|Mumbai|Delhi|Bangalore|(^|[^A-Za-z])IN([^A-Za-z]|$)|(^|[^A-Za-z])IND([^A-Za-z]|$))",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/in.svg"
+            icon: "IN.png"
         },
         {
             name: "JP",
             regex: "(?i)(日本|东京|東京|大阪|🇯🇵|(^|[^A-Za-z])JP([^A-Za-z]|$)|(^|[^A-Za-z])JPN([^A-Za-z]|$)|Japan)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/jp.svg"
+            icon: "JP.png"
         },
         {
             name: "KR",
             regex: "(?i)(韩国|韓國|南韩|南韓|首尔|首爾|🇰🇷|(^|[^A-Za-z])KR([^A-Za-z]|$)|(^|[^A-Za-z])KOR([^A-Za-z]|$)|Korea)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/kr.svg"
+            icon: "KR.png"
         },
         {
             name: "MY",
             regex: "(?i)(马来西亚|馬來西亞|吉隆坡|🇲🇾|(^|[^A-Za-z])MY([^A-Za-z]|$)|(^|[^A-Za-z])MYS([^A-Za-z]|$)|Malaysia)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/my.svg"
+            icon: "MY.png"
         },
         {
             name: "NL",
             regex: "(?i)(荷兰|荷蘭|阿姆斯特丹|🇳🇱|(^|[^A-Za-z])NL([^A-Za-z]|$)|(^|[^A-Za-z])NLD([^A-Za-z]|$)|Netherlands|Amsterdam)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/nl.svg"
+            icon: "Area.png"
         },
         {
             name: "PH",
             regex: "(?i)(菲律宾|菲律賓|马尼拉|馬尼拉|宿务|宿霧|🇵🇭|(^|[^A-Za-z])PH([^A-Za-z]|$)|(^|[^A-Za-z])PHL([^A-Za-z]|$)|Philippines|Manila|Cebu)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/ph.svg"
+            icon: "PH.png"
         },
         {
             name: "SG",
             regex: "(?i)(新加坡|狮城|獅城|🇸🇬|(^|[^A-Za-z])SG([^A-Za-z]|$)|(^|[^A-Za-z])SGP([^A-Za-z]|$)|Singapore)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/sg.svg"
+            icon: "SG.png"
         },
         {
             name: "TH",
             regex: "(?i)(泰国|泰國|曼谷|🇹🇭|Thailand|Bangkok|(^|[^A-Za-z])TH([^A-Za-z]|$)|(^|[^A-Za-z])THA([^A-Za-z]|$))",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/th.svg"
+            icon: "TH.png"
         },
         {
             name: "TR",
             regex: "(?i)(土耳其|伊斯坦布尔|🇹🇷|(^|[^A-Za-z])TR([^A-Za-z]|$)|(^|[^A-Za-z])TUR([^A-Za-z]|$)|Turkey|Türkiye|Istanbul)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/tr.svg"
+            icon: "TR.png"
         },
         {
             name: "TW",
             regex: "(?i)(台湾|台灣|台北|新北|🇹🇼|(^|[^A-Za-z])TW([^A-Za-z]|$)|(^|[^A-Za-z])TWN([^A-Za-z]|$)|Taiwan)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/tw.svg"
+            icon: "TW.png"
         },
         {
             name: "US",
             regex: "(?i)(美国|美國|洛杉矶|洛杉磯|圣何塞|聖何塞|硅谷|矽谷|西雅图|西雅圖|纽约|紐約|🇺🇸|(^|[^A-Za-z])US([^A-Za-z]|$)|(^|[^A-Za-z])USA([^A-Za-z]|$)|United[ -]?States)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/us.svg"
+            icon: "US.png"
         },
         {
             name: "VN",
             regex: "(?i)(越南|河内|河內|胡志明|🇻🇳|(^|[^A-Za-z])VN([^A-Za-z]|$)|(^|[^A-Za-z])VNM([^A-Za-z]|$)|Viet[ -]?Nam|Hanoi|Ho[ -]?Chi[ -]?Minh)",
-            icon: "https://cdn.jsdmirror.com/gh/HatScripts/circle-flags@gh-pages/flags/vn.svg"
+            icon: "Area.png"
         }
     ];
 
     const apps = [
-        { name: "AI", icon: "openai.png" },
-        { name: "Apple", icon: "apple.png" },
-        {
-            name: "GitHub",
-            icon: "https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/assets/github.png"
-        },
-        { name: "Google", icon: "google.png" },
-        { name: "Microsoft", icon: "microsoft.png" },
-        { name: "Spotify", icon: "spotify.png" },
-        { name: "Telegram", icon: "telegram.png" },
-        { name: "TikTok", icon: "tiktok.png" },
-        { name: "TV", icon: "netflix.png" },
-        { name: "X", icon: "x.png" },
-        { name: "YouTube", icon: "youtube.png" }
+        { name: "AI", icon: "ChatGPT.png" },
+        { name: "Apple", icon: "Apple_2.png" },
+        { name: "GitHub", icon: "GitHub.png" },
+        { name: "Google", icon: "Google_Search.png" },
+        { name: "Microsoft", icon: "Microsoft.png" },
+        { name: "PayPal", icon: "PayPal.png" },
+        { name: "Spotify", icon: "Spotify.png" },
+        { name: "Steam", icon: "Steam.png" },
+        { name: "Telegram", icon: "Telegram_X.png" },
+        { name: "TikTok", icon: "TikTok_1.png" },
+        { name: "TV", icon: "Netflix.png" },
+        { name: "X", icon: "X.png" },
+        { name: "YouTube", icon: "YouTube.png" }
     ];
 
     const OWN_GROUPS = [
         "主代理",
         "静态",
         "直连",
+        "兜底",
         ...apps.map(app => app.name)
     ];
 
@@ -355,14 +361,13 @@ function main(params) {
     });
 
     const hasActiveRegions = activeRegions.length > 0;
+    const activeRegionNames = activeRegions.map(region => region.name);
 
     // ── 订阅 DNS 清洗 ──
     // 清洗指向已重建规则集/策略组的引用及 geosite/geoip，避免内核报错或额外下载 geo 文件
 
     // 取自实际会建组的 activeRegions，避免引用到节点不足未建组的地区（内核找不到目标组）
-    const REGION_NAMES = new Set(
-        activeRegions.map(region => region.name)
-    );
+    const REGION_NAMES = new Set(activeRegionNames);
 
     const PROXY_NAMES = new Set(
         allProxies.map(proxy => proxy && proxy.name).filter(Boolean)
@@ -737,7 +742,7 @@ function main(params) {
                       "https://1.1.1.1/dns-query#RULES",
                       "https://8.8.8.8/dns-query#RULES"
                   ],
-        // DIRECT 命中且未被 policy 覆盖的冷门国内域名用国内明文 DNS；DoH 在部分环境会反复回退 default-nameserver，拖高延迟
+        // DIRECT 命中且未被 policy 覆盖的域名用国内明文 DNS；DoH 在部分环境会反复回退 default-nameserver，拖高延迟
         "direct-nameserver": [...CN_DNS_PLAIN],
         // true：DIRECT 命中域名先走 nameserver-policy，未被覆盖才落到 direct-nameserver
         "direct-nameserver-follow-policy": true,
@@ -789,6 +794,8 @@ function main(params) {
         "appletv-domain": "apple-tvplus",
         "hbo-domain": "hbo",
         "spotify-domain": "spotify",
+        "steam-domain": "steam",
+        "paypal-domain": "paypal",
         "google-domain": "google",
         "apple-domain": "apple",
         "microsoft-domain": "microsoft",
@@ -947,10 +954,10 @@ function main(params) {
     groups.push({
         name: "主代理",
         type: "select",
-        icon: "https://cdn.jsdmirror.com/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Proxy.png",
+        icon: qureIcon("Proxy.png"),
         proxies: hasActiveRegions
             ? [
-                  ...activeRegions.map(region => region.name),
+                  ...activeRegionNames,
                   "静态",
                   "直连"
               ]
@@ -961,7 +968,7 @@ function main(params) {
     groups.push({
         name: "静态",
         type: "select",
-        icon: "https://cdn.jsdmirror.com/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Static.png",
+        icon: qureIcon("Static.png"),
         proxies: usableNames,
         "empty-fallback": "REJECT"
     });
@@ -971,26 +978,22 @@ function main(params) {
         name: "直连",
         type: "select",
         hidden: true,
-        icon: "https://cdn.jsdmirror.com/gh/Koolson/Qure@63be653774a6a83cd8e475a7b65f1ed68b9a0093/IconSet/Color/Direct.png",
+        icon: qureIcon("Direct.png"),
         proxies: ["DIRECT"]
     });
 
     const appProxiesList = [
         "主代理",
         "直连",
-        ...activeRegions.map(region => region.name)
+        ...activeRegionNames
     ];
 
     // App 策略组：proxies 前列为切换目标，后列订阅节点本身，两者缺一不可
     apps.forEach(app => {
-        const icon = app.icon.startsWith("http")
-            ? app.icon
-            : `https://cdn.jsdmirror.com/gh/shindgew/WHATSINStash@main/icon/${app.icon}`;
-
         groups.push({
             name: app.name,
             type: "select",
-            icon,
+            icon: qureIcon(app.icon),
             proxies: [...appProxiesList, ...usableNames]
         });
     });
@@ -1000,7 +1003,7 @@ function main(params) {
             name: region.name,
             type: "url-test",
             hidden: true,
-            icon: region.icon,
+            icon: qureIcon(region.icon),
             proxies: regionNodeNames.get(region.name),
             "empty-fallback": "REJECT",
             url: TEST_URL_PROXY,
@@ -1013,12 +1016,18 @@ function main(params) {
         });
     });
 
-    // 全部节点被 excludeFilter 过滤时「静态」将解析为空并回落 REJECT（静默断网），转换期能确定，留一条日志
-    const usableCount = usableNames.length;
+    // 兜底必须保持为最后一个策略组；默认引用主代理，不改变原脚本的默认出口行为
+    groups.push({
+        name: "兜底",
+        type: "select",
+        icon: qureIcon("Final.png"),
+        proxies: [...appProxiesList, ...usableNames]
+    });
 
-    if (usableCount === 0) {
+    // 全部节点被 excludeFilter 过滤时「静态」将解析为空并回落 REJECT（需代理的流量全断），转换期能确定，留一条日志
+    if (usableNames.length === 0) {
         warnLog(
-            "[Clash_rule.js] 订阅节点全部被 excludeFilter 过滤，「静态」组将为空并回落 REJECT，网络将不可用；请检查 excludeFilter 或节点命名。"
+            "[Clash_rule.js] 订阅节点全部被 excludeFilter 过滤，「静态」组将为空并回落 REJECT，需代理的流量将被拒绝，直连规则不受影响；请检查 excludeFilter 或节点命名。"
         );
     }
 
@@ -1048,6 +1057,8 @@ function main(params) {
         "RULE-SET,telegram-ip,Telegram,no-resolve",
         "RULE-SET,ai-domain,AI",
         "RULE-SET,github-domain,GitHub",
+        "RULE-SET,steam-domain,Steam",
+        "RULE-SET,paypal-domain,PayPal",
 
         "RULE-SET,netflix-domain,TV",
         "RULE-SET,disney-domain,TV",
@@ -1066,7 +1077,7 @@ function main(params) {
         
         "RULE-SET,cn-ip,DIRECT",
 
-        "MATCH,主代理"
+        "MATCH,兜底"
     ];
 
     return params;
