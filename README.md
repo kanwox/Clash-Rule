@@ -6,12 +6,17 @@
 
 **高效运行 · 稳定使用 · 智能分流**
 
-一套面向现代代理客户端（Mihomo / Stash / Surfboard）的高性能分流规则库
+一套面向现代代理客户端（Clash / Egern / Loon / Quantumult X / Shadowrocket / Stash / Surfboard / Surge）的高性能分流规则库
 
-[![mihomo](https://img.shields.io/badge/Kernel-Mihomo%201.18%2B-5B8DEF?logo=github&logoColor=white)](#1-clash_rulejs-mihomo-预处理脚本)
-[![Stash](https://img.shields.io/badge/Platform-Stash-10B981?logo=apple&logoColor=white)](#2-stashyaml-stash-完整配置)
-[![Surfboard](https://img.shields.io/badge/Platform-Surfboard-F59E0B?logo=android&logoColor=white)](#3-surfboardconf-surfboard-配置文件)
-[![Ruleset](https://img.shields.io/badge/Ruleset-MetaCubeX%20mrs-8B5CF6)](#-核心架构)
+[![Clash](https://img.shields.io/badge/Clash-5B8DEF?logo=github&logoColor=white)](./Clash/)
+[![Egern](https://img.shields.io/badge/Egern-0EA5E9?logo=apple&logoColor=white)](./Egern/)
+[![Loon](https://img.shields.io/badge/Loon-4B7BEC?logo=apple&logoColor=white)](./Loon/)
+[![Quantumult X](https://img.shields.io/badge/Quantumult%20X-7C3AED?logo=apple&logoColor=white)](./QuantumultX/)
+[![Shadowrocket](https://img.shields.io/badge/Shadowrocket-FF6B35?logo=apple&logoColor=white)](./Shadowrocket/)
+[![Stash](https://img.shields.io/badge/Stash-10B981?logo=apple&logoColor=white)](./Stash/)
+[![Surfboard](https://img.shields.io/badge/Surfboard-F59E0B?logo=android&logoColor=white)](./Surfboard/)
+[![Surge](https://img.shields.io/badge/Surge-111827?logo=apple&logoColor=white)](./Surge/)
+[![Ruleset](https://img.shields.io/badge/Ruleset-MRS%20%2F%20LIST-8B5CF6)](#-核心架构)
 
 </div>
 
@@ -19,46 +24,28 @@
 
 ## 📥 导入链接
 
-| 配置文件 | 直达链接 (Raw) | 镜像链接 (jsdmirror) | 适用客户端 |
+| 客户端 | 直达链接 (Raw) | 镜像链接 (jsdmirror) | 文档说明 |
 | :--- | :--- | :--- | :--- |
-| **`Clash_rule.js`** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash_rule.js) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash_rule.js` | Clash Verge Rev / Mihomo Party / Nyanpasu 等 |
-| **`Stash.yaml`** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Stash.yaml) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash.yaml` | Stash (iOS / macOS / Windows) |
-| **`Surfboard.conf`** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surfboard.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard.conf` | Surfboard (Android) |
+| **Clash / Mihomo** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash/Clash_rule.js) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash/Clash_rule.js` | [📖 查看文档](./Clash/) |
+| **Egern** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Egern/Egern.yaml) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Egern/Egern.yaml` | [📖 查看文档](./Egern/) |
+| **Loon** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Loon/Loon.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Loon/Loon.conf` | [📖 查看文档](./Loon/) |
+| **Quantumult X** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/QuantumultX/QuantumultX.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/QuantumultX/QuantumultX.conf` | [📖 查看文档](./QuantumultX/) |
+| **Shadowrocket** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Shadowrocket/Shadowrocket.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Shadowrocket/Shadowrocket.conf` | [📖 查看文档](./Shadowrocket/) |
+| **Stash** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Stash/Stash.yaml) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash/Stash.yaml` | [📖 查看文档](./Stash/) |
+| **Surfboard** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surfboard/Surfboard.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard/Surfboard.conf` | [📖 查看文档](./Surfboard/) |
+| **Surge** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surge/Surge.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surge/Surge.conf` | [📖 查看文档](./Surge/) |
 
-> 💡 提示：首次加载需联网拉取规则集，若直连缓慢推荐使用镜像链接。
-
----
-
-## ⚡ 配置速通
-
-### 1. Clash_rule.js (Mihomo 预处理脚本)
-适用于支持 JavaScript 扩展脚本的 Mihomo 内核客户端（内核需 ≥ 1.18.0，仅支持节点平铺订阅）：
-- **使用方法**：在客户端（如 Clash Verge Rev / Mihomo Party）中，进入订阅管理 → 右键订阅选择「编辑脚本 / 扩展配置」→ 贴入脚本代码并更新订阅。
-- **特性**：
-  - **自动分组**：涵盖 23 个国家/地区，同地区节点 ≥2 个自动创建独立测速组（`url-test`）。
-  - **连接嗅探**：启用 HTTP/TLS/QUIC 嗅探与 `parse-pure-ip`，纯 IP 流量精准还原域名分流。
-  - **DNS 优化**：Fake-IP (ARC 算法)，国内域名由本地 DoH 解析，广告域名 DNS 层直接拒绝。
-  - **节点净化**：自动剔除剩余流量/到期等信息节点；重名节点自动重命名容错；自动补全 Chrome uTLS 指纹。
-
-### 2. Stash.yaml (Stash 完整配置)
-适用于 Stash 客户端，开箱即用：
-- **使用方法**：下载文件导入 Stash，在顶部 `proxy-providers.All.url` 处填入你的真实订阅链接。
-- **特性**：内置 5 大常用地区测速组、13 个独立应用分流、mrs 二进制规则集与精细 Fake-IP 过滤。
-
-### 3. Surfboard.conf (Surfboard 配置文件)
-适用于 Android 端 Surfboard 客户端：
-- **使用方法**：用文本编辑器打开，将 `[Proxy Group]` 中 `静态` 组的 `policy-path="在这里填写订阅链接"` 替换为真实订阅，导入客户端即可。
-- **特性**：支持主流地区正则筛选、国内直连与分流对齐。
+> 💡 提示：首次加载需联网拉取规则集。业务规则与群晖规则集统一使用 jsdmirror 镜像。
 
 ---
 
 ## 🧩 核心架构
 
-三份配置保持统一的分流策略与交互设计：
+各端配置保持统一的核心分流策略与交互设计，统一包含 **HK / JP / SG / TW / US** 五个地区自动组：
 
 ```text
 主代理
-├─ 地区自动测速组 (HK / JP / SG / US / TW ... 自动识别，默认折叠)
+├─ 地区自动组 (HK / JP / SG / TW / US，默认隐藏)
 ├─ 静态 (所有有效节点平铺，便捷选点)
 └─ DIRECT (直连)
 
@@ -72,38 +59,18 @@
 ```
 
 - **真实 IP 白名单**：系统对时 (NTP)、STUN、微软/苹果连通性探测、游戏联机等直连不经假 IP。
-- **双层广告防护**：DNS 层 `rcode://name_error` 拒答 + 规则层 `REJECT` 拦截。
-- **每周自动更新**：规则集统一设置 7 天自动同步。
-
----
-
-## ⚙️ 进阶调整 (Clash_rule.js)
-
-如需微调行为，可直接修改 `Clash_rule.js` 头部常量：
-
-| 参数 | 默认值 | 说明 |
-| :--- | :--- | :--- |
-| `DEFAULT_IP_VERSION` | `"dual"` | 双栈策略：`dual` (并发择优) / `ipv6-prefer` / `ipv4-prefer` |
-| `REGION_MIN_NODES` | `2` | 达到该节点数才创建对应地区测速组 |
-| `BLOCK_QUIC` | `false` | 阻断 UDP 443 迫使回退 TCP（节点 UDP 质量差时可开） |
-| `RS_INTERVAL` | `604800` | 规则集自动更新周期（秒，默认 7 天） |
+- **分层广告防护**：Mihomo、Loon 与 Quantumult X 支持 DNS 层拒绝；各端均保留规则层 `REJECT`，Surge 与 Shadowrocket 额外使用预匹配。
+- **远程规则更新**：各端业务规则与群晖原生规则集均使用 jsdmirror 镜像，统一不包含威联通规则。
 
 ---
 
 ## ❓ 常见问题
 
 <details>
-<summary><b>Q: 为什么提示「检测到 proxy-providers 订阅，已拒绝生成」？</b></summary>
-<br>
-
-**A:** `Clash_rule.js` 需在配置阶段解析节点属性并动态构建策略组。`proxy-providers` 订阅是在内核运行时才异步拉取节点，导致转换期无法读取节点列表，请改用节点平铺的常规订阅。
-</details>
-
-<details>
 <summary><b>Q: 为什么首次启动较慢或部分海外网站打不开？</b></summary>
 <br>
 
-**A:** 首次启动需联网下载远程规则集（`.mrs` / `.list` 文件）。请在客户端日志中确认规则集全部下载成功；若拉取受阻，可开启代理环境或使用加速镜像链接。
+**A:** 首次启动需联网下载远程规则集（`.mrs` / `.list` / `.yaml` 文件）。各端统一使用 jsdmirror 镜像，请在客户端日志中确认规则集下载状态；不要混用其他平台的规则格式，或把纯域名集直接当作原生规则集。
 </details>
 
 ---

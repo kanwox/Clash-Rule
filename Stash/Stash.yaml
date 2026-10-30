@@ -1,31 +1,25 @@
-# Stash 配置文件
+# 使用说明：将 proxy-providers.All.url 中的「订阅链接填写处」替换为真实订阅链接。
 mode: rule
 
-# ------------------ 代理提供者 ------------------
 proxy-providers:
   All:
-    url: "你的真实订阅链接"
+    url: "订阅链接填写处"
     interval: 86400
     path: ./all.yaml
     filter: '(?i)^(?!.*(流量|时间|重置|到期|过期|官网|网址|地址|客服|订阅|通知|群组|有效|本站|防止|Expire|Traffic|Reset|(^|[^A-Za-z0-9])(\d+(\.\d+)?\s*(GB|TB)|\d+\s*Days?)([^A-Za-z0-9]|$))).*$'
 
-# ------------------ DNS ------------------
 dns:
   enable: true
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
   ipv6: true
-  # 解析下面加密 DNS 服务器域名用，除 system 外必须是 IP。
+  # 解析下列加密 DNS 服务器域名用，除 system 外必须是 IP
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
-  # 通用 nameserver 保持国内可直连的服务器
   nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
-  # 分域解析策略：
-  # - 国内域名指回国内解析器，保留 CDN 就近调度准确性
-  # - 私网域名直接走系统解析，不经代理 DNS
   # 注：Stash 不支持 rcode:// 形式的否定回答，广告域名只能在规则层 REJECT
   nameserver-policy:
     'rule-set:cn-domain':
@@ -33,7 +27,6 @@ dns:
       - 119.29.29.29
     'rule-set:private-domain':
       - system
-  # 代理服务器域名解析专用链路
   proxy-server-nameserver:
     - 223.5.5.5
     - https://dns.alidns.com/dns-query
@@ -42,15 +35,14 @@ dns:
     - 'localhost'
     - '+.local'
     - '+.home.arpa'
-    # 复用规则集覆盖手维护清单，防漏项
     - 'rule-set:cn-domain'
     - 'rule-set:private-domain'
-    - '+.pool.ntp.org'
+    - '+.ntp.org'
+    - '+.stun.*'
     - '+.stun.*.*'
     - '+.stun.*.*.*'
     - '+.stun.*.*.*.*'
     - '+.stun.*.*.*.*.*'
-    - '+.ntp.org'
     - 'time.apple.com'
     - 'time.asia.apple.com'
     - 'time.windows.com'
@@ -59,21 +51,21 @@ dns:
     - 'ntp.aliyun.com'
     - 'ntp.tencent.com'
     - 'ntp.ntsc.ac.cn'
-    # Windows 连通性检测
     - '+.msftconnecttest.com'
     - '+.msftncsi.com'
-    # QQ 快速登录检测
     - 'localhost.ptlogin2.qq.com'
     - 'localhost.sec.qq.com'
     - 'localhost.work.weixin.qq.com'
     - '+.stun.playstation.net'
     - '+.xboxlive.com'
+    - '+.playstation.net'
+    - '+.xbox.com'
+    - 'xbox.ipv6.microsoft.com'
+    - '+.srv.nintendo.net'
 
-# ------------------ 域名嗅探 ------------------
 sniffer:
   enable: true
   force-dns-mapping: true
-  # 纯 IP 流量从 SNI / Host 还原域名参与分流
   parse-pure-ip: true
   override-destination: true
   sniff:
@@ -92,117 +84,12 @@ sniffer:
     - '+.oaiusercontent.com'
     - '+.chatgpt.com'
 
-# ------------------ 策略组 ------------------
 proxy-groups:
   - name: 主代理
     type: select
     lazy: true
     icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Proxy.png
     proxies: [HK, JP, SG, TW, US, 静态, DIRECT]
-
-  - name: 静态
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Static.png
-    use: [All]
-
-  - name: AI
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: Apple
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Apple.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: GitHub
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/GitHub.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: Google
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Google_Search.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: Microsoft
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: Spotify
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Spotify.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: Telegram
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Telegram_X.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: TikTok
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/TikTok_1.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: TV
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Netflix.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: X
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/X.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: PayPal
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/PayPal.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: Steam
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Steam.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: YouTube
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
-    proxies: [主代理, HK, JP, SG, TW, US, DIRECT]
-    use: [All]
-
-  - name: 兜底
-    type: select
-    lazy: true
-    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Final.png
-    proxies: [主代理, DIRECT, HK, JP, SG, TW, US]
-    use: [All]
 
   - name: HK
     type: url-test
@@ -239,7 +126,7 @@ proxy-groups:
     hidden: true
     icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/TW.png
     include-all: true
-    filter: '(?i)(台湾|台灣|台北|新北|台中|高雄|(^|[^A-Za-z])TW([^A-Za-z]|$)|(^|[^A-Za-z])TWN([^A-Za-z]|$)|Taiwan)'
+    filter: '(?i)(台湾|台灣|台北|新北|台中|高雄|🇹🇼|(^|[^A-Za-z])TW([^A-Za-z]|$)|(^|[^A-Za-z])TWN([^A-Za-z]|$)|Taiwan)'
     interval: 300
     tolerance: 50
     lazy: true
@@ -254,7 +141,110 @@ proxy-groups:
     tolerance: 50
     lazy: true
 
-# ------------------ 规则集 ------------------
+  - name: 静态
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Static.png
+    use: [All]
+
+  - name: AI
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: Apple
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Apple.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: GitHub
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/GitHub.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: Google
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Google_Search.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: Microsoft
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: PayPal
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/PayPal.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: Spotify
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Spotify.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: Steam
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Steam.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: Telegram
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Telegram_X.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: TikTok
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/TikTok_1.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: TV
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Netflix.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: X
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/X.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: YouTube
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
+    proxies: [主代理, HK, JP, SG, TW, US, 静态, DIRECT]
+    use: [All]
+
+  - name: 兜底
+    type: select
+    lazy: true
+    icon: https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Final.png
+    proxies: [主代理, DIRECT, HK, JP, SG, TW, US, 静态]
+    use: [All]
+
 rule-providers:
   lan-cidr:
     behavior: ipcidr
@@ -273,12 +263,6 @@ rule-providers:
     format: mrs
     path: ./rules/synology-domain.mrs
     url: "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/synology.mrs"
-    interval: 604800
-  qnap-domain:
-    behavior: domain
-    format: mrs
-    path: ./rules/qnap-domain.mrs
-    url: "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/qnap.mrs"
     interval: 604800
   ads-domain:
     behavior: domain
@@ -413,17 +397,11 @@ rule-providers:
     url: "https://cdn.jsdmirror.com/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs"
     interval: 604800
 
-# ------------------ 分流规则 ------------------
-# 顺序与 Clash_rule.js V5.6 对齐：私网 → 广告 → NAS 厂商 → 传输层兜底 → 应用分流 → 国内直连 → 兜底
 rules:
-  # 私网分层：域名走 DIRECT 不做 IP 解析，IP 段再单独判定
   - RULE-SET,private-domain,DIRECT
   - RULE-SET,lan-cidr,DIRECT,no-resolve
   - RULE-SET,ads-domain,REJECT
-  # 群晖、威联通官方服务及其 DDNS 直连
   - RULE-SET,synology-domain,DIRECT
-  - RULE-SET,qnap-domain,DIRECT
-  # 系统对时仅放行 UDP 123；很多节点丢弃 TCP 123 且时间偏差会连带 TLS 校验失败
   - AND,((DST-PORT,123),(NETWORK,udp)),DIRECT
   - RULE-SET,youtube-domain,YouTube
   - RULE-SET,twitter-domain,X
@@ -446,5 +424,4 @@ rules:
   - RULE-SET,proxy-domain,主代理
   - RULE-SET,cn-domain,DIRECT
   - RULE-SET,cn-ip,DIRECT
-  # 兜底组保持最后，默认指向主代理，不改变原默认出口行为
   - MATCH,兜底
