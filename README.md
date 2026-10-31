@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="assets/github.png" width="72" alt="Logo" />
+<img src="https://cdn.jsdmirror.com/gh/Koolson/Qure@master/IconSet/Color/Proxy.png" width="72" alt="Logo" />
 
 # Proxy Rule
 
 **高效运行 · 稳定使用 · 智能分流**
 
-一套面向现代代理客户端（Clash / Egern / Loon / Quantumult X / Shadowrocket / Stash / Surfboard / Surge）的高性能分流规则库
+一套面向现代代理客户端的高性能分流规则库
 
 [![Clash](https://img.shields.io/badge/Clash-5B8DEF?logo=github&logoColor=white)](./Clash/)
 [![Egern](https://img.shields.io/badge/Egern-0EA5E9?logo=apple&logoColor=white)](./Egern/)
@@ -24,7 +24,7 @@
 
 ## 📥 导入链接
 
-| 客户端 | 直达链接 (Raw) | 镜像链接 (jsdmirror) | 文档说明 |
+| 客户端 | 直达链接 (Raw) | 镜像链接 (jsdmirror) | 配置说明 |
 | :--- | :--- | :--- | :--- |
 | **Clash / Mihomo** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash/Clash_rule.js) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash/Clash_rule.js` | [📖 查看文档](./Clash/) |
 | **Egern** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Egern/Egern.yaml) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Egern/Egern.yaml` | [📖 查看文档](./Egern/) |
@@ -35,21 +35,21 @@
 | **Surfboard** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surfboard/Surfboard.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard/Surfboard.conf` | [📖 查看文档](./Surfboard/) |
 | **Surge** | [查看原文件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surge/Surge.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surge/Surge.conf` | [📖 查看文档](./Surge/) |
 
-> 💡 提示：首次加载需联网拉取规则集。业务规则与群晖规则集统一使用 jsdmirror 镜像。
+> 💡 提示：首次使用需联网拉取远程规则集；导入前请参阅对应客户端说明配置订阅。
 
 ---
 
 ## 🧩 核心架构
 
-各端配置保持统一的核心分流策略与交互设计，统一包含 **HK / JP / SG / TW / US** 五个地区自动组：
+各端配置保持统一的分流策略与交互设计，标配 **HK / JP / SG / TW / US** 常用地区测速组：
 
 ```text
 主代理
-├─ 地区自动组 (HK / JP / SG / TW / US，默认隐藏)
-├─ 静态 (所有有效节点平铺，便捷选点)
+├─ 地区测速组 (HK / JP / SG / TW / US，默认隐藏)
+├─ 静态 (有效节点平铺，便捷手动选点)
 └─ DIRECT (直连)
 
-13 大独立业务组 (可选主代理 / 独立地区 / 直连 / 具体节点)
+13 大独立业务组 (可任意指定主代理 / 地区组 / 直连 / 具体节点)
 ├─ 常用平台：Google · Apple · Microsoft · GitHub · Telegram · X · YouTube · TikTok · Spotify · Steam · PayPal
 ├─ 人工智能：AI (ChatGPT · Claude · Gemini)
 └─ 流媒体聚合：TV (Netflix · Disney+ · HBO · Prime Video · Apple TV+)
@@ -58,9 +58,9 @@
 局域网/私网 ➜ 广告拦截 ➜ NAS/NTP对时直连 ➜ 核心应用分流 ➜ 海外常用服务 ➜ 大陆域名/IP直连 ➜ 兜底组 (主代理)
 ```
 
-- **真实 IP 白名单**：系统对时 (NTP)、STUN、微软/苹果连通性探测、游戏联机等直连不经假 IP。
-- **分层广告防护**：Mihomo、Loon 与 Quantumult X 支持 DNS 层拒绝；各端均保留规则层 `REJECT`，Surge 与 Shadowrocket 额外使用预匹配。
-- **远程规则更新**：各端业务规则与群晖原生规则集均使用 jsdmirror 镜像，统一不包含威联通规则。
+- **真实 IP 白名单**：网络对时 (NTP)、STUN 探测、系统连通性测试及游戏联机直连走真实 IP，避免 Fake-IP 带来连通性异常。
+- **分层广告防护**：Mihomo、Loon 与 Quantumult X 支持 DNS 层面拒绝；各端均保留规则层 `REJECT`，Surge 与 Shadowrocket 开启预匹配优化。
+- **远程规则托管**：主流平台业务规则与群晖服务规则集支持自动定期拉取更新，保持长期低维护可用。
 
 ---
 
@@ -70,7 +70,14 @@
 <summary><b>Q: 为什么首次启动较慢或部分海外网站打不开？</b></summary>
 <br>
 
-**A:** 首次启动需联网下载远程规则集（`.mrs` / `.list` / `.yaml` 文件）。各端统一使用 jsdmirror 镜像，请在客户端日志中确认规则集下载状态；不要混用其他平台的规则格式，或把纯域名集直接当作原生规则集。
+**A:** 首次加载需联网拉取远程规则集（`.mrs` / `.list` / `.yaml`）。请在客户端日志中确认规则集下载是否成功。
+</details>
+
+<details>
+<summary><b>Q: 为什么个别地区策略组没有显示或不可用？</b></summary>
+<br>
+
+**A:** 策略组根据节点名称正则自动归类，请确认订阅中是否包含对应地区的有效节点。各端默认过滤了包含“流量/到期/官网”等非节点信息条目。
 </details>
 
 ---

@@ -780,7 +780,6 @@ function main(params) {
     const DOMAIN_SETS = {
         "private-domain": "private",
         "synology-domain": "synology",
-        "qnap-domain": "qnap",
         "ads-domain": "category-ads-all",
         "youtube-domain": "youtube",
         "twitter-domain": "twitter",
@@ -1039,9 +1038,8 @@ function main(params) {
         "RULE-SET,private-domain,DIRECT",
         "RULE-SET,private-ip,DIRECT,no-resolve",
         "RULE-SET,ads-domain,REJECT",
-        // 群晖、威联通官方服务及其 DDNS 直连；须早于 geolocation-!cn 和 MATCH
+        // 群晖官方服务及其 DDNS 直连；须早于 geolocation-!cn 和 MATCH
         "RULE-SET,synology-domain,DIRECT",
-        "RULE-SET,qnap-domain,DIRECT",
         // 系统对时优先于业务分流：很多节点丢弃/限制 UDP 123，时间偏差会连带导致全局 TLS 证书校验失败
         "AND,((DST-PORT,123),(NETWORK,udp)),DIRECT",
         ...(BLOCK_QUIC
