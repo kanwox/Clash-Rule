@@ -6,10 +6,14 @@
 
 ## 📥 导入链接
 
+<div align="center">
+
 | 类型 | 链接 |
-| :--- | :--- |
-| **直达链接 (Raw)** | `https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash/Clash_rule.js` |
-| **镜像链接 (jsdmirror)** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash/Clash_rule.js` |
+| :---: | :---: |
+| **直达链接** | `https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash/Clash_rule.js` |
+| **镜像链接** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash/Clash_rule.js` |
+
+</div>
 
 ---
 
@@ -35,9 +39,13 @@
 
 如需调整行为，可修改 [Clash_rule.js](./Clash_rule.js) 头部常量：
 
+<div align="center">
+
 | 参数 | 默认值 | 说明 |
-| :--- | :--- | :--- |
+| :---: | :---: | :---: |
 | `DEFAULT_IP_VERSION` | `"dual"` | 双栈策略：`dual` / `ipv6-prefer` / `ipv4-prefer` |
 | `REGION_MIN_NODES` | `2` | 创建地区测速组的最低节点数量 |
 | `BLOCK_QUIC` | `false` | 阻断 UDP 443 迫使回退 TCP |
 | `RS_INTERVAL` | `604800` | 规则集更新周期（秒，默认 7 天） |
+
+</div>

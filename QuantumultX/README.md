@@ -6,10 +6,14 @@
 
 ## 📥 导入链接
 
+<div align="center">
+
 | 类型 | 链接 |
-| :--- | :--- |
-| **直达链接 (Raw)** | `https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/QuantumultX/QuantumultX.conf` |
-| **镜像链接 (jsdmirror)** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/QuantumultX/QuantumultX.conf` |
+| :---: | :---: |
+| **直达链接** | `https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/QuantumultX/QuantumultX.conf` |
+| **镜像链接** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/QuantumultX/QuantumultX.conf` |
+
+</div>
 
 ---
 
