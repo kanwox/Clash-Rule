@@ -26,16 +26,16 @@
 
 <div align="center">
 
-| 客户端 | 镜像链接 | 直达链接 | 配置说明 |
-| :---: | :---: | :---: | :---: |
-| **Clash / Mihomo** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash/Clash_rule.js` | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash/Clash_rule.js) | [查看文档](./Clash/) |
-| **Egern** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Egern/Egern.yaml` | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Egern/Egern.yaml) | [查看文档](./Egern/) |
-| **Loon** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Loon/Loon.conf` | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Loon/Loon.conf) | [查看文档](./Loon/) |
-| **Quantumult X** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/QuantumultX/QuantumultX.conf` | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/QuantumultX/QuantumultX.conf) | [查看文档](./QuantumultX/) |
-| **Shadowrocket** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Shadowrocket/Shadowrocket.conf` | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Shadowrocket/Shadowrocket.conf) | [查看文档](./Shadowrocket/) |
-| **Stash** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash/Stash.yaml` | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Stash/Stash.yaml) | [查看文档](./Stash/) |
-| **Surfboard** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard/Surfboard.conf` | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surfboard/Surfboard.conf) | [查看文档](./Surfboard/) |
-| **Surge** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surge/Surge.conf` | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surge/Surge.conf) | [查看文档](./Surge/) |
+| 客户端 | 直达链接 | 镜像链接 |
+| :---: | :---: | :---: |
+| **Clash / Mihomo** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash/Clash_rule.js) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash/Clash_rule.js` |
+| **Egern** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Egern/Egern.yaml) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Egern/Egern.yaml` |
+| **Loon** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Loon/Loon.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Loon/Loon.conf` |
+| **Quantumult X** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/QuantumultX/QuantumultX.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/QuantumultX/QuantumultX.conf` |
+| **Shadowrocket** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Shadowrocket/Shadowrocket.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Shadowrocket/Shadowrocket.conf` |
+| **Stash** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Stash/Stash.yaml) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Stash/Stash.yaml` |
+| **Surfboard** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surfboard/Surfboard.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surfboard/Surfboard.conf` |
+| **Surge** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Surge/Surge.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Surge/Surge.conf` |
 
 </div>
 
