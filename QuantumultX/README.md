@@ -9,7 +9,7 @@
 <div align="center">
 
 | 类型 | 链接 |
-| :---: | :---: |
+| :---: | :--- |
 | **直达链接** | `https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/QuantumultX/QuantumultX.conf` |
 | **镜像链接** | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/QuantumultX/QuantumultX.conf` |
 

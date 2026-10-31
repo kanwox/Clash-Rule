@@ -27,7 +27,7 @@
 <div align="center">
 
 | 客户端 | 直达链接 | 镜像链接 | 配置说明 |
-| :---: | :---: | :---: | :---: |
+| :---: | :---: | :--- | :---: |
 | **Clash / Mihomo** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Clash/Clash_rule.js) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Clash/Clash_rule.js` | [查看文档](./Clash/) |
 | **Egern** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Egern/Egern.yaml) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Egern/Egern.yaml` | [查看文档](./Egern/) |
 | **Loon** | [查看原件](https://raw.githubusercontent.com/kanwox/Proxy-Rule/main/Loon/Loon.conf) | `https://cdn.jsdmirror.com/gh/kanwox/Proxy-Rule@main/Loon/Loon.conf` | [查看文档](./Loon/) |
